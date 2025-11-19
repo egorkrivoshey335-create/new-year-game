@@ -5,809 +5,901 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Новогодний Сбор: Ultimate Edition</title>
     <style>
-        :root {
-            --bg-color: #0f172a;
-            --primary: #0ea5e9;
-            --accent: #f43f5e;
-            --gold: #fbbf24;
-            --green: #22c55e;
-            --text: #f8fafc;
-            --panel-bg: rgba(15, 23, 42, 0.95);
-            --font-main: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
+:root {
+    --bg-color: #0f172a;
+    --primary: #0ea5e9;
+    --accent: #f43f5e;
+    --gold: #fbbf24;
+    --green: #22c55e;
+    --text: #f8fafc;
+    --panel-bg: rgba(15, 23, 42, 0.95);
+    --font-main: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
 
-        * { box-sizing: border-box; touch-action: pan-y; user-select: none; -webkit-user-select: none; }
-        
-        body {
-            margin: 0; padding: 0;
-            background: var(--bg-color);
-            color: var(--text);
-            font-family: var(--font-main);
-            overflow: hidden;
-            height: 100vh;
-            height: 100dvh;
-            display: flex; justify-content: center; align-items: center;
-            position: fixed;
-            width: 100%;
-        }
+* { 
+    box-sizing: border-box; 
+    touch-action: pan-y; 
+    user-select: none; 
+    -webkit-user-select: none; 
+}
 
-        #game-container {
-            position: relative;
-            width: 100%; max-width: 600px; 
-            height: 100vh;
-            height: 100dvh;
-            background: linear-gradient(to bottom, #0b1026 0%, #2b32b2 100%);
-            overflow: hidden;
-            box-shadow: 0 0 20px rgba(0,0,0,0.5);
-            cursor: crosshair;
-            touch-action: none;
-        }
+body {
+    margin: 0; 
+    padding: 0;
+    background: var(--bg-color);
+    color: var(--text);
+    font-family: var(--font-main);
+    overflow: hidden;
+    height: 100vh;
+    height: 100dvh;
+    display: flex; 
+    justify-content: center; 
+    align-items: center;
+    position: fixed;
+    width: 100%;
+}
 
-        canvas { 
-            display: block; 
-            width: 100%; 
-            height: 100%; 
-            touch-action: none;
-        }
+#game-container {
+    position: relative;
+    width: 100%; 
+    max-width: 600px; 
+    height: 100vh;
+    height: 100dvh;
+    background: linear-gradient(to bottom, #0b1026 0%, #2b32b2 100%);
+    overflow: hidden;
+    box-shadow: 0 0 20px rgba(0,0,0,0.5);
+    cursor: crosshair;
+    touch-action: none;
+}
 
-        /* UI LAYERS */
-        .ui-layer {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            display: flex; flex-direction: column;
-            pointer-events: none; 
-            transition: opacity 0.3s ease, visibility 0.3s;
-            opacity: 1;
-            visibility: visible;
-            z-index: 10;
-        }
-        
-        .ui-layer.hidden { 
-            opacity: 0; 
-            visibility: hidden; 
-            z-index: -1; 
-        }
+canvas { 
+    display: block; 
+    width: 100%; 
+    height: 100%; 
+    touch-action: none;
+}
 
-        .interactive, .btn, .modal, .shop-item, .card { pointer-events: all; }
+/* UI LAYERS */
+.ui-layer {
+    position: absolute; 
+    top: 0; 
+    left: 0; 
+    width: 100%; 
+    height: 100%;
+    display: flex; 
+    flex-direction: column;
+    pointer-events: none; 
+    transition: opacity 0.3s ease, visibility 0.3s;
+    opacity: 1;
+    visibility: visible;
+    z-index: 10;
+}
 
-        /* LOADING SCREEN */
-        #loading-screen {
-            background: linear-gradient(135deg, #1e3a8a 0%, #7c3aed 100%);
-            justify-content: center;
-            align-items: center;
-            pointer-events: all;
-            z-index: 1000;
-        }
-        
-        .loading-content {
-            text-align: center;
-            max-width: 400px;
-            padding: 20px;
-        }
-        
-        .loading-logo {
-            font-size: 4rem;
-            margin-bottom: 20px;
-            animation: bounce 2s infinite;
-        }
-        
-        @keyframes bounce {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-20px); }
-        }
-        
-        .loading-title {
-            font-size: 2rem;
-            font-weight: bold;
-            color: var(--gold);
-            margin-bottom: 30px;
-            text-shadow: 0 0 20px rgba(251, 191, 36, 0.5);
-        }
-        
-        .loading-bar {
-            width: 100%;
-            height: 8px;
-            background: rgba(255,255,255,0.2);
-            border-radius: 10px;
-            overflow: hidden;
-            margin-bottom: 15px;
-        }
-        
-        .loading-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #fbbf24, #f59e0b);
-            width: 0%;
-            transition: width 0.3s;
-            box-shadow: 0 0 10px var(--gold);
-        }
-        
-        .loading-text {
-            font-size: 0.9rem;
-            color: rgba(255,255,255,0.7);
-            margin-bottom: 20px;
-            min-height: 40px;
-        }
-        
-        .story-text {
-            font-size: 1rem;
-            line-height: 1.6;
-            color: #fff;
-            text-align: left;
-            background: rgba(0,0,0,0.3);
-            padding: 20px;
-            border-radius: 15px;
-            margin-bottom: 20px;
-            max-height: 200px;
-            overflow-y: auto;
-        }
+.ui-layer.hidden { 
+    opacity: 0; 
+    visibility: hidden; 
+    z-index: -1; 
+}
 
-        /* TUTORIAL SCREEN */
-        #tutorial-screen {
-            background: rgba(0,0,0,0.9);
-            justify-content: center;
-            align-items: center;
-            pointer-events: all;
-            z-index: 999;
-        }
-        
-        .tutorial-box {
-            background: var(--panel-bg);
-            padding: 30px;
-            border-radius: 20px;
-            max-width: 500px;
-            width: 90%;
-            text-align: center;
-            border: 3px solid var(--primary);
-        }
-        
-        .tutorial-icon {
-            font-size: 5rem;
-            margin-bottom: 20px;
-        }
-        
-        .tutorial-title {
-            font-size: 1.8rem;
-            font-weight: bold;
-            color: var(--gold);
-            margin-bottom: 15px;
-        }
-        
-        .tutorial-desc {
-            font-size: 1rem;
-            line-height: 1.6;
-            margin-bottom: 20px;
-            color: rgba(255,255,255,0.9);
-        }
-        
-        .tutorial-step {
-            font-size: 0.9rem;
-            color: var(--primary);
-            margin-bottom: 20px;
-        }
+.interactive, .btn, .modal, .shop-item, .card { 
+    pointer-events: all; 
+}
 
-        /* MENU */
-        #menu-screen {
-            background: rgba(0,0,0,0.7);
-            backdrop-filter: blur(8px);
-            justify-content: flex-start;
-            align-items: center;
-            text-align: center;
-            pointer-events: all;
-            overflow-y: auto;
-            overflow-x: hidden;
-            padding: 20px 0;
-            -webkit-overflow-scrolling: touch;
-        }
-        
-        .logo { 
-            font-size: 2.5rem; 
-            font-weight: 900; 
-            color: var(--gold); 
-            text-shadow: 0 0 15px var(--accent); 
-            margin-bottom: 15px; 
-            animation: float 3s ease-in-out infinite; 
-        }
-        
-        .header-stats {
-            display: flex; 
-            gap: 15px; 
-            width: 90%; 
-            justify-content: center;
-            background: rgba(255,255,255,0.1); 
-            padding: 12px; 
-            border-radius: 15px;
-            margin-bottom: 15px; 
-            font-weight: bold;
-        }
+/* LOADING SCREEN */
+#loading-screen {
+    background: linear-gradient(135deg, #1e3a8a 0%, #7c3aed 100%);
+    justify-content: center;
+    align-items: center;
+    pointer-events: all;
+    z-index: 1000;
+}
 
-        /* IDLE BOX */
-        .idle-box {
-            background: linear-gradient(45deg, #1e293b, #334155);
-            width: 90%; 
-            padding: 15px; 
-            border-radius: 15px; 
-            margin-bottom: 15px;
-            border: 1px solid rgba(255,255,255,0.1); 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center;
-        }
-        .idle-info div:first-child { font-size: 0.8rem; color: #94a3b8; }
-        .idle-amount { font-size: 1.4rem; color: var(--green); font-weight: bold; }
+.loading-content {
+    text-align: center;
+    max-width: 400px;
+    padding: 20px;
+}
 
-        /* TABS */
-        .tabs { 
-            display: flex; 
-            gap: 5px; 
-            margin-bottom: 10px; 
-            background: rgba(0,0,0,0.3); 
-            padding: 5px; 
-            border-radius: 20px;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-        .tab-btn {
-            background: none; 
-            border: none; 
-            color: #888; 
-            padding: 8px 12px;
-            font-weight: bold; 
-            border-radius: 15px; 
-            transition: 0.2s;
-            cursor: pointer;
-            font-size: 0.85rem;
-        }
-        .tab-btn.active { 
-            background: var(--primary); 
-            color: white; 
-            box-shadow: 0 2px 10px rgba(59, 130, 246, 0.4); 
-        }
+.loading-logo {
+    font-size: 4rem;
+    margin-bottom: 20px;
+    animation: bounce 2s infinite;
+}
 
-        /* CARDS GRID */
-        .card-grid { 
-            display: grid; 
-            grid-template-columns: 1fr 1fr; 
-            gap: 10px; 
-            width: 90%; 
-            margin-bottom: 20px;
-        }
-        .card {
-            background: rgba(255,255,255,0.08); 
-            padding: 10px; 
-            border-radius: 12px;
-            text-align: center; 
-            border: 1px solid rgba(255,255,255,0.1);
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            justify-content: space-between;
-        }
-        .card h3 { margin: 5px 0; font-size: 0.9rem; }
-        .card .icon { font-size: 2rem; margin: 5px 0; }
-        .lvl-badge { 
-            font-size: 0.7rem; 
-            background: #333; 
-            padding: 2px 6px; 
-            border-radius: 4px; 
-            color: #aaa; 
-        }
-        
-        .card.locked {
-            opacity: 0.6;
-            border: 2px solid #ef4444;
-            position: relative;
-        }
-        
-        .card.locked::before {
-            content: '🔒';
-            position: absolute;
-            top: 5px;
-            right: 5px;
-            font-size: 1.5rem;
-        }
+@keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-20px); }
+}
 
-        /* BUTTONS */
-        .btn {
-            background: linear-gradient(135deg, #ff512f 0%, #dd2476 100%);
-            border: none; 
-            padding: 15px 40px; 
-            color: white;
-            font-size: 1.2rem; 
-            font-weight: bold; 
-            border-radius: 30px;
-            cursor: pointer; 
-            margin: 5px;
-            box-shadow: 0 4px 15px rgba(221, 36, 118, 0.4);
-            transition: transform 0.1s;
-        }
-        .btn:active { transform: scale(0.95); }
-        .btn-small { 
-            padding: 8px 16px; 
-            font-size: 0.9rem; 
-            background: rgba(255,255,255,0.2); 
-            box-shadow: none; 
-        }
-        .btn.green { 
-            background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%); 
-            box-shadow: 0 4px 0 #15803d; 
-        }
-        .btn:disabled { 
-            filter: grayscale(1); 
-            opacity: 0.6; 
-            cursor: not-allowed;
-            transform: scale(1);
-        }
+.loading-title {
+    font-size: 2rem;
+    font-weight: bold;
+    color: var(--gold);
+    margin-bottom: 30px;
+    text-shadow: 0 0 20px rgba(251, 191, 36, 0.5);
+}
 
-        /* PLAY BUTTON CONTAINER - ИСПРАВЛЕНО: FIXED ПОЗИЦИЯ */
-        .play-container {
-            position: sticky; 
-            bottom: 0; 
-            /*left: 50%;
-            transform: translateX(-50%);*/
-            width: 100%; 
-            max-width: 600px;
-            display: flex; 
-            gap: 10px;
-            z-index: 100; /* Увеличен z-index */
-            padding: 15px;
-            /*background: linear-gradient(to top, rgba(15, 23, 42, 0.98) 0%, rgba(15, 23, 42, 0.95) 80%, transparent 100%);*/
-            padding-bottom: calc(15px + env(safe-area-inset-bottom));
-        }
-        .big-play-btn {
-            flex: 2; 
-            font-size: 1.5rem; 
-            padding: 20px;
-            background: linear-gradient(to right, #f59e0b, #d97706);
-            box-shadow: 0 6px 0 #b45309;
-        }
+.loading-bar {
+    width: 100%;
+    height: 8px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 15px;
+}
 
-        /* HUD */
-        #hud-screen { 
-            justify-content: space-between; 
-            padding: 15px; 
-            pointer-events: none; 
-        }
-        .hud-top { 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: flex-start; 
-            width: 100%;
-        }
-        .hearts-container { font-size: 1.5rem; letter-spacing: 5px; }
-        .score-container { 
-            font-size: 2rem; 
-            font-weight: 800; 
-            text-shadow: 0 2px 4px rgba(0,0,0,0.5); 
-        }
-        
-        /* COMBO SYSTEM */
-        .combo-display {
-            position: absolute;
-            top: 100px;
-            right: 20px;
-            background: rgba(0,0,0,0.8);
-            padding: 10px 15px;
-            border-radius: 12px;
-            border: 2px solid var(--gold);
-            font-size: 1.2rem;
-            font-weight: bold;
-            display: none;
-            animation: pulse 0.5s infinite;
-        }
-        .combo-display.show { display: block; }
-        
-        /* ACTIVE POWERUPS DISPLAY */
-        .powerups-display {
-            position: absolute;
-            top: 60px;
-            left: 15px;
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-        }
-        .powerup-indicator {
-            background: rgba(0,0,0,0.7);
-            padding: 5px 10px;
-            border-radius: 8px;
-            font-size: 0.9rem;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            border: 2px solid;
-            animation: pulse 1s infinite;
-        }
-        .powerup-indicator.shield { border-color: #3b82f6; }
-        .powerup-indicator.magnet { border-color: #f59e0b; }
-        .powerup-indicator.double { border-color: #22c55e; }
-        .powerup-indicator.slow { border-color: #a855f7; }
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.7; }
-        }
-        
-        /* WEATHER EFFECTS */
-        .weather-overlay {
-            position: absolute;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            pointer-events: none;
-            z-index: 3;
-        }
-        
-        .snowflake, .firework-particle {
-            position: absolute;
-            color: white;
-            font-size: 20px;
-            animation: fall linear infinite;
-            pointer-events: none;
-        }
-        
-        @keyframes fall {
-            to { transform: translateY(100vh); }
-        }
-        
-        /* BOSS HP BAR */
-        .boss-hp-bar {
-            position: absolute; 
-            top: 70px; 
-            left: 50%; 
-            transform: translateX(-50%);
-            width: 250px; 
-            height: 20px; 
-            background: #333; 
-            border-radius: 10px;
-            display: none; 
-            overflow: hidden; 
-            border: 2px solid #fff;
-        }
-        .boss-hp-fill { 
-            width: 100%; 
-            height: 100%; 
-            background: linear-gradient(90deg, #ef4444, #dc2626); 
-            transition: width 0.3s; 
-        }
-        .boss-name {
-            position: absolute;
-            top: 45px;
-            left: 50%;
-            transform: translateX(-50%);
-            font-weight: bold;
-            font-size: 1.2rem;
-            color: var(--accent);
-            text-shadow: 0 2px 4px black;
-            display: none;
-        }
+.loading-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #fbbf24, #f59e0b);
+    width: 0%;
+    transition: width 0.3s;
+    box-shadow: 0 0 10px var(--gold);
+}
 
-        /* BOSS BATTLE MODE */
-        .boss-battle-controls {
-            position: absolute;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            display: none;
-            pointer-events: all;
-        }
-        .throw-btn {
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #f59e0b, #d97706);
-            border: 4px solid white;
-            font-size: 2rem;
-            cursor: pointer;
-            transition: 0.1s;
-            box-shadow: 0 4px 15px rgba(245, 158, 11, 0.5);
-        }
-        .throw-btn:active {
-            transform: scale(0.9);
-        }
+.loading-text {
+    font-size: 0.9rem;
+    color: rgba(255,255,255,0.7);
+    margin-bottom: 20px;
+    min-height: 40px;
+}
 
-        /* ULTIMATE BUTTON */
-        .ult-bar-container {
-            position: absolute; 
-            bottom: 20px; 
-            right: 20px; 
-            width: 80px; 
-            height: 80px;
-            pointer-events: all;
-        }
-        .ult-btn {
-            width: 100%; 
-            height: 100%; 
-            border-radius: 50%; 
-            border: 4px solid #fff;
-            background: rgba(0,0,0,0.5); 
-            color: white; 
-            font-weight: bold;
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            flex-direction: column;
-            overflow: hidden; 
-            position: relative; 
-            font-size: 0.8rem;
-            cursor: pointer;
-        }
-        .ult-fill {
-            position: absolute; 
-            bottom: 0; 
-            left: 0; 
-            width: 100%; 
-            height: 0%;
-            background: linear-gradient(to top, #3b82f6, #60a5fa);
-            transition: height 0.2s; 
-            z-index: -1;
-        }
-        .ult-ready { 
-            animation: glow 1s infinite alternate; 
-            border-color: #60a5fa; 
-        }
-        @keyframes glow { 
-            from { box-shadow: 0 0 10px #3b82f6; } 
-            to { box-shadow: 0 0 25px #60a5fa; } 
-        }
+.story-text {
+    font-size: 1rem;
+    line-height: 1.6;
+    color: #fff;
+    text-align: left;
+    background: rgba(0,0,0,0.3);
+    padding: 20px;
+    border-radius: 15px;
+    margin-bottom: 20px;
+    max-height: 200px;
+    overflow-y: auto;
+}
 
-        /* MODALS */
-        .modal {
-            position: absolute; 
-            top: 50%; 
-            left: 50%; 
-            transform: translate(-50%, -50%);
-            background: var(--panel-bg); 
-            padding: 25px; 
-            border-radius: 20px;
-            width: 90%; 
-            max-width: 400px; 
-            text-align: center;
-            border: 2px solid var(--primary);
-            box-shadow: 0 0 50px rgba(14, 165, 233, 0.2);
-            display: none; 
-            z-index: 100;
-            max-height: 80vh;
-            overflow-y: auto;
-        }
-        .modal.open { display: block; animation: popIn 0.3s; }
-        
-        /* QUEST LIST */
-        .quest-list, .achievement-list {
-            max-height: 300px;
-            overflow-y: auto;
-            margin: 15px 0;
-        }
-        .quest-item, .achievement-item {
-            background: rgba(255,255,255,0.05);
-            padding: 12px;
-            border-radius: 10px;
-            margin-bottom: 10px;
-            border-left: 4px solid var(--primary);
-            position: relative;
-        }
-        .quest-item.completed, .achievement-item.unlocked {
-            border-left-color: var(--green);
-            opacity: 0.7;
-        }
-        .quest-progress-bar, .achievement-progress-bar {
-            background: #333;
-            height: 8px;
-            border-radius: 4px;
-            overflow: hidden;
-            margin-top: 5px;
-        }
-        .quest-progress-fill, .achievement-progress-fill {
-            height: 100%;
-            background: var(--primary);
-            transition: width 0.3s;
-        }
-        
-        /* MINI GAME - ИСПРАВЛЕНО КОЛЕСО РУЛЕТКИ */
-        .minigame-container {
-            width: 100%;
-            margin: 20px 0;
-        }
-        
-        .slot-machine {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            margin: 20px 0;
-        }
-        
-        .slot {
-            font-size: 4rem;
-            width: 80px;
-            height: 100px;
-            background: rgba(0,0,0,0.5);
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border: 2px solid var(--gold);
-        }
-        
-        .roulette-container {
-            position: relative;
-            width: 250px;
-            height: 250px;
-            margin: 20px auto;
-        }
-        
-        .roulette-pointer {
-            position: absolute;
-            top: -35px;
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: 3rem;
-            z-index: 10;
-        }
-        
-        .roulette-wheel {
-            width: 100%;
-            height: 100%;
-            border-radius: 50%;
-            position: relative;
-            transition: transform 3s cubic-bezier(0.17, 0.67, 0.12, 0.99);
-            border: 5px solid var(--gold);
-            box-shadow: 0 0 20px rgba(251, 191, 36, 0.5);
-            overflow: hidden;
-            background: conic-gradient(
-                from 0deg,
-                #ef4444 0deg 60deg,
-                #22c55e 60deg 120deg,
-                #3b82f6 120deg 180deg,
-                #fbbf24 180deg 240deg,
-                #a855f7 240deg 300deg,
-                #ef4444 300deg 360deg
-            );
-        }
-        
-        .roulette-labels {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-        }
-        
-        .roulette-label {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 50%;
-            height: 20px;
-            margin-top: -10px;
-            transform-origin: left center;
-            display: flex;
-            align-items: center;
-            justify-content: flex-end;
-            padding-right: 20px;
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: white;
-            text-shadow: 0 2px 4px black;
-        }
-        
-        /* LEADERBOARD */
-        .leaderboard-list {
-            max-height: 300px;
-            overflow-y: auto;
-        }
-        
-        .leaderboard-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px;
-            background: rgba(255,255,255,0.05);
-            border-radius: 8px;
-            margin-bottom: 5px;
-        }
-        
-        .leaderboard-rank {
-            font-size: 1.5rem;
-            font-weight: bold;
-            width: 40px;
-        }
-        
-        .leaderboard-rank.first { color: #fbbf24; }
-        .leaderboard-rank.second { color: #94a3b8; }
-        .leaderboard-rank.third { color: #cd7f32; }
-        
-        /* EFFECTS */
-        @keyframes float { 
-            0%, 100% { transform: translateY(0); } 
-            50% { transform: translateY(-10px); } 
-        }
-        @keyframes popIn { 
-            from { transform: translate(-50%, -40%); opacity: 0; } 
-            to { transform: translate(-50%, -50%); opacity: 1; } 
-        }
-        
-        #blizzard-overlay {
-            position: absolute; 
-            top:0; 
-            left:0; 
-            width:100%; 
-            height:100%;
-            background: rgba(255,255,255,0.4);
-            pointer-events: none; 
-            opacity: 0; 
-            transition: opacity 2s; 
-            z-index: 5;
-        }
-        #blizzard-overlay.active { opacity: 1; }
-        
-        #flash-overlay {
-            position: absolute; 
-            top:0; 
-            left:0; 
-            width:100%; 
-            height:100%;
-            pointer-events: none; 
-            opacity: 0; 
-            z-index: 20; 
-            transition: opacity 0.1s;
-        }
-        
-        .float-text {
-            position: absolute; 
-            font-weight: bold; 
-            color: #fff;
-            text-shadow: 0 2px 0 #000; 
-            pointer-events: none;
-            animation: floatUp 1s forwards;
-            z-index: 30;
-        }
-        @keyframes floatUp { 
-            from { transform: translateY(0) scale(1); opacity: 1; } 
-            to { transform: translateY(-50px) scale(1.5); opacity: 0; } 
-        }
-        
-        .boss-warning {
-            position: absolute; 
-            top: 40%; 
-            width: 100%; 
-            text-align: center;
-            font-size: 3rem; 
-            color: var(--accent); 
-            font-weight: 900;
-            text-shadow: 0 0 20px black; 
-            opacity: 0; 
-            pointer-events: none;
-            z-index: 30;
-        }
-        .boss-warning.anim { animation: warningAnim 2s forwards; }
-        @keyframes warningAnim { 
-            0% { opacity:0; transform: scale(0.5); } 
-            20% { opacity:1; transform: scale(1.2); } 
-            80% { opacity:1; transform: scale(1); } 
-            100% { opacity:0; transform: scale(1.5); } 
-        }
+/* TUTORIAL SCREEN */
+#tutorial-screen {
+    background: rgba(0,0,0,0.9);
+    justify-content: center;
+    align-items: center;
+    pointer-events: all;
+    z-index: 999;
+}
 
-        /* WIN NOTIFICATION */
-        .win-notification {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%) scale(0);
-            background: linear-gradient(135deg, #22c55e, #16a34a);
-            padding: 30px;
-            border-radius: 20px;
-            font-size: 2rem;
-            font-weight: bold;
-            color: white;
-            z-index: 200;
-            box-shadow: 0 0 50px rgba(34, 197, 94, 0.5);
-            animation: winPop 2s forwards;
-            pointer-events: none;
-        }
-        
-        @keyframes winPop {
-            0% { transform: translate(-50%, -50%) scale(0); }
-            10% { transform: translate(-50%, -50%) scale(1.2); }
-            20% { transform: translate(-50%, -50%) scale(1); }
-            90% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
-            100% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
-        }
+.tutorial-box {
+    background: var(--panel-bg);
+    padding: 30px;
+    border-radius: 20px;
+    max-width: 500px;
+    width: 90%;
+    text-align: center;
+    border: 3px solid var(--primary);
+}
+
+.tutorial-icon {
+    font-size: 5rem;
+    margin-bottom: 20px;
+}
+
+.tutorial-title {
+    font-size: 1.8rem;
+    font-weight: bold;
+    color: var(--gold);
+    margin-bottom: 15px;
+}
+
+.tutorial-desc {
+    font-size: 1rem;
+    line-height: 1.6;
+    margin-bottom: 20px;
+    color: rgba(255,255,255,0.9);
+}
+
+.tutorial-step {
+    font-size: 0.9rem;
+    color: var(--primary);
+    margin-bottom: 20px;
+}
+
+/* MENU */
+#menu-screen {
+    background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(8px);
+    justify-content: flex-start;
+    align-items: center;
+    text-align: center;
+    pointer-events: all;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 20px 0;
+    -webkit-overflow-scrolling: touch;
+}
+
+.logo { 
+    font-size: 2.5rem; 
+    font-weight: 900; 
+    color: var(--gold); 
+    text-shadow: 0 0 15px var(--accent); 
+    margin-bottom: 15px; 
+    animation: float 3s ease-in-out infinite; 
+}
+
+.header-stats {
+    display: flex; 
+    gap: 15px; 
+    width: 90%; 
+    justify-content: center;
+    background: rgba(255,255,255,0.1); 
+    padding: 12px; 
+    border-radius: 15px;
+    margin-bottom: 15px; 
+    font-weight: bold;
+}
+
+/* IDLE BOX */
+.idle-box {
+    background: linear-gradient(45deg, #1e293b, #334155);
+    width: 90%; 
+    padding: 15px; 
+    border-radius: 15px; 
+    margin-bottom: 15px;
+    border: 1px solid rgba(255,255,255,0.1); 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center;
+}
+
+.idle-info div:first-child { 
+    font-size: 0.8rem; 
+    color: #94a3b8; 
+}
+
+.idle-amount { 
+    font-size: 1.4rem; 
+    color: var(--green); 
+    font-weight: bold; 
+}
+
+/* TABS */
+.tabs { 
+    display: flex; 
+    gap: 5px; 
+    margin-bottom: 10px; 
+    background: rgba(0,0,0,0.3); 
+    padding: 5px; 
+    border-radius: 20px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.tab-btn {
+    background: none; 
+    border: none; 
+    color: #888; 
+    padding: 8px 12px;
+    font-weight: bold; 
+    border-radius: 15px; 
+    transition: 0.2s;
+    cursor: pointer;
+    font-size: 0.85rem;
+}
+
+.tab-btn.active { 
+    background: var(--primary); 
+    color: white; 
+    box-shadow: 0 2px 10px rgba(59, 130, 246, 0.4); 
+}
+
+/* CARDS GRID */
+.card-grid { 
+    display: grid; 
+    grid-template-columns: 1fr 1fr; 
+    gap: 10px; 
+    width: 90%; 
+    margin-bottom: 20px;
+}
+
+.card {
+    background: rgba(255,255,255,0.08); 
+    padding: 10px; 
+    border-radius: 12px;
+    text-align: center; 
+    border: 1px solid rgba(255,255,255,0.1);
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; 
+    justify-content: space-between;
+}
+
+.card h3 { 
+    margin: 5px 0; 
+    font-size: 0.9rem; 
+}
+
+.card .icon { 
+    font-size: 2rem; 
+    margin: 5px 0; 
+}
+
+.lvl-badge { 
+    font-size: 0.7rem; 
+    background: #333; 
+    padding: 2px 6px; 
+    border-radius: 4px; 
+    color: #aaa; 
+}
+
+.card.locked {
+    opacity: 0.6;
+    border: 2px solid #ef4444;
+    position: relative;
+}
+
+.card.locked::before {
+    content: '🔒';
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    font-size: 1.5rem;
+}
+
+/* BUTTONS */
+.btn {
+    background: linear-gradient(135deg, #ff512f 0%, #dd2476 100%);
+    border: none; 
+    padding: 15px 40px; 
+    color: white;
+    font-size: 1.2rem; 
+    font-weight: bold; 
+    border-radius: 30px;
+    cursor: pointer; 
+    margin: 5px;
+    box-shadow: 0 4px 15px rgba(221, 36, 118, 0.4);
+    transition: transform 0.1s;
+}
+
+.btn:active { 
+    transform: scale(0.95); 
+}
+
+.btn-small { 
+    padding: 8px 16px; 
+    font-size: 0.9rem; 
+    background: rgba(255,255,255,0.2); 
+    box-shadow: none; 
+}
+
+.btn.green { 
+    background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%); 
+    box-shadow: 0 4px 0 #15803d; 
+}
+
+.btn:disabled { 
+    filter: grayscale(1); 
+    opacity: 0.6; 
+    cursor: not-allowed;
+    transform: scale(1);
+}
+
+/* PLAY BUTTON CONTAINER */
+.play-container {
+    position: sticky; 
+    bottom: 0; 
+    /*left: 50%;
+    transform: translateX(-50%);*/
+    width: 100%; 
+    max-width: 600px;
+    display: flex; 
+    gap: 10px;
+    z-index: 100; /* Увеличен z-index */
+    padding: 15px;
+    /*background: linear-gradient(to top, rgba(15, 23, 42, 0.98) 0%, rgba(15, 23, 42, 0.95) 80%, transparent 100%);*/
+    padding-bottom: calc(15px + env(safe-area-inset-bottom));
+}
+
+.big-play-btn {
+    flex: 2; 
+    font-size: 1.5rem; 
+    padding: 20px;
+    background: linear-gradient(to right, #f59e0b, #d97706);
+    box-shadow: 0 6px 0 #b45309;
+}
+
+/* HUD */
+#hud-screen { 
+    justify-content: space-between; 
+    padding: 15px; 
+    pointer-events: none; 
+}
+
+.hud-top { 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: flex-start; 
+    width: 100%;
+}
+
+.hearts-container { 
+    font-size: 1.5rem; 
+    letter-spacing: 5px; 
+}
+
+.score-container { 
+    font-size: 2rem; 
+    font-weight: 800; 
+    text-shadow: 0 2px 4px rgba(0,0,0,0.5); 
+}
+
+/* COMBO SYSTEM */
+.combo-display {
+    position: absolute;
+    top: 100px;
+    right: 20px;
+    background: rgba(0,0,0,0.8);
+    padding: 10px 15px;
+    border-radius: 12px;
+    border: 2px solid var(--gold);
+    font-size: 1.2rem;
+    font-weight: bold;
+    display: none;
+    animation: pulse 0.5s infinite;
+}
+
+.combo-display.show { 
+    display: block; 
+}
+
+/* ACTIVE POWERUPS DISPLAY */
+.powerups-display {
+    position: absolute;
+    top: 60px;
+    left: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.powerup-indicator {
+    background: rgba(0,0,0,0.7);
+    padding: 5px 10px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    border: 2px solid;
+    animation: pulse 1s infinite;
+}
+
+.powerup-indicator.shield { border-color: #3b82f6; }
+.powerup-indicator.magnet { border-color: #f59e0b; }
+.powerup-indicator.double { border-color: #22c55e; }
+.powerup-indicator.slow { border-color: #a855f7; }
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+
+/* WEATHER EFFECTS */
+.weather-overlay {
+    position: absolute;
+    top: 0; 
+    left: 0;
+    width: 100%; 
+    height: 100%;
+    pointer-events: none;
+    z-index: 3;
+}
+
+.snowflake, .firework-particle {
+    position: absolute;
+    color: white;
+    font-size: 20px;
+    animation: fall linear infinite;
+    pointer-events: none;
+}
+
+@keyframes fall {
+    to { transform: translateY(100vh); }
+}
+
+/* BOSS HP BAR */
+.boss-hp-bar {
+    position: absolute; 
+    top: 70px; 
+    left: 50%; 
+    transform: translateX(-50%);
+    width: 250px; 
+    height: 20px; 
+    background: #333; 
+    border-radius: 10px;
+    display: none; 
+    overflow: hidden; 
+    border: 2px solid #fff;
+    z-index: 50;
+}
+
+.boss-hp-fill { 
+    width: 100%; 
+    height: 100%; 
+    background: linear-gradient(90deg, #ef4444, #dc2626); 
+    transition: width 0.3s; 
+}
+
+.boss-name {
+    position: absolute;
+    top: 45px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-weight: bold;
+    font-size: 1.2rem;
+    color: var(--accent);
+    text-shadow: 0 2px 4px black;
+    display: none;
+    z-index: 50;
+}
+
+/* BOSS BATTLE MODE */
+.boss-battle-controls {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: none;
+    pointer-events: all;
+    z-index: 50;
+}
+
+.throw-btn {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    border: 4px solid white;
+    font-size: 2rem;
+    cursor: pointer;
+    transition: 0.1s;
+    box-shadow: 0 4px 15px rgba(245, 158, 11, 0.5);
+}
+
+.throw-btn:active {
+    transform: scale(0.9);
+}
+
+/* ULTIMATE BUTTON */
+.ult-bar-container {
+    position: absolute; 
+    bottom: 20px; 
+    right: 20px; 
+    width: 80px; 
+    height: 80px;
+    pointer-events: all;
+    z-index: 50;
+}
+
+.ult-btn {
+    width: 100%; 
+    height: 100%; 
+    border-radius: 50%; 
+    border: 4px solid #fff;
+    background: rgba(0,0,0,0.5); 
+    color: white; 
+    font-weight: bold;
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    flex-direction: column;
+    overflow: hidden; 
+    position: relative; 
+    font-size: 0.8rem;
+    cursor: pointer;
+}
+
+.ult-fill {
+    position: absolute; 
+    bottom: 0; 
+    left: 0; 
+    width: 100%; 
+    height: 0%;
+    background: linear-gradient(to top, #3b82f6, #60a5fa);
+    transition: height 0.2s; 
+    z-index: -1;
+}
+
+.ult-ready { 
+    animation: glow 1s infinite alternate; 
+    border-color: #60a5fa; 
+}
+
+@keyframes glow { 
+    from { box-shadow: 0 0 10px #3b82f6; } 
+    to { box-shadow: 0 0 25px #60a5fa; } 
+}
+
+/* MODALS */
+.modal {
+    position: absolute; 
+    top: 50%; 
+    left: 50%; 
+    transform: translate(-50%, -50%);
+    background: var(--panel-bg); 
+    padding: 25px; 
+    border-radius: 20px;
+    width: 90%; 
+    max-width: 400px; 
+    text-align: center;
+    border: 2px solid var(--primary);
+    box-shadow: 0 0 50px rgba(14, 165, 233, 0.2);
+    display: none; 
+    z-index: 100;
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+.modal.open { 
+    display: block; 
+    animation: popIn 0.3s; 
+}
+
+/* QUEST LIST */
+.quest-list, .achievement-list {
+    max-height: 300px;
+    overflow-y: auto;
+    margin: 15px 0;
+}
+
+.quest-item, .achievement-item {
+    background: rgba(255,255,255,0.05);
+    padding: 12px;
+    border-radius: 10px;
+    margin-bottom: 10px;
+    border-left: 4px solid var(--primary);
+    position: relative;
+}
+
+.quest-item.completed, .achievement-item.unlocked {
+    border-left-color: var(--green);
+    opacity: 0.7;
+}
+
+.quest-progress-bar, .achievement-progress-bar {
+    background: #333;
+    height: 8px;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-top: 5px;
+}
+
+.quest-progress-fill, .achievement-progress-fill {
+    height: 100%;
+    background: var(--primary);
+    transition: width 0.3s;
+}
+
+/* MINI GAME */
+.minigame-container {
+    width: 100%;
+    margin: 20px 0;
+}
+
+.slot-machine {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin: 20px 0;
+}
+
+.slot {
+    font-size: 4rem;
+    width: 80px;
+    height: 100px;
+    background: rgba(0,0,0,0.5);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid var(--gold);
+}
+
+.roulette-container {
+    position: relative;
+    width: 250px;
+    height: 250px;
+    margin: 20px auto;
+}
+
+.roulette-pointer {
+    position: absolute;
+    top: -35px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 3rem;
+    z-index: 10;
+}
+
+.roulette-wheel {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    position: relative;
+    transition: transform 3s cubic-bezier(0.17, 0.67, 0.12, 0.99);
+    border: 5px solid var(--gold);
+    box-shadow: 0 0 20px rgba(251, 191, 36, 0.5);
+    overflow: hidden;
+    background: conic-gradient(
+        from 0deg,
+        #ef4444 0deg 60deg,
+        #22c55e 60deg 120deg,
+        #3b82f6 120deg 180deg,
+        #fbbf24 180deg 240deg,
+        #a855f7 240deg 300deg,
+        #ef4444 300deg 360deg
+    );
+}
+
+.roulette-labels {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
+.roulette-label {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 50%;
+    height: 20px;
+    margin-top: -10px;
+    transform-origin: left center;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding-right: 20px;
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: white;
+    text-shadow: 0 2px 4px black;
+}
+
+/* LEADERBOARD */
+.leaderboard-list {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.leaderboard-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 8px;
+    margin-bottom: 5px;
+}
+
+.leaderboard-rank {
+    font-size: 1.5rem;
+    font-weight: bold;
+    width: 40px;
+}
+
+.leaderboard-rank.first { color: #fbbf24; }
+.leaderboard-rank.second { color: #94a3b8; }
+.leaderboard-rank.third { color: #cd7f32; }
+
+/* EFFECTS */
+@keyframes float { 
+    0%, 100% { transform: translateY(0); } 
+    50% { transform: translateY(-10px); } 
+}
+
+@keyframes popIn { 
+    from { transform: translate(-50%, -40%); opacity: 0; } 
+    to { transform: translate(-50%, -50%); opacity: 1; } 
+}
+
+#blizzard-overlay {
+    position: absolute; 
+    top:0; 
+    left:0; 
+    width:100%; 
+    height:100%;
+    background: rgba(255,255,255,0.4);
+    pointer-events: none; 
+    opacity: 0; 
+    transition: opacity 2s; 
+    z-index: 5;
+}
+
+#blizzard-overlay.active { 
+    opacity: 1; 
+}
+
+#flash-overlay {
+    position: absolute; 
+    top:0; 
+    left:0; 
+    width:100%; 
+    height:100%;
+    pointer-events: none; 
+    opacity: 0; 
+    z-index: 20; 
+    transition: opacity 0.1s;
+}
+
+.float-text {
+    position: absolute; 
+    font-weight: bold; 
+    color: #fff;
+    text-shadow: 0 2px 0 #000; 
+    pointer-events: none;
+    animation: floatUp 1s forwards;
+    z-index: 30;
+}
+
+@keyframes floatUp { 
+    from { transform: translateY(0) scale(1); opacity: 1; } 
+    to { transform: translateY(-50px) scale(1.5); opacity: 0; } 
+}
+
+.boss-warning {
+    position: absolute; 
+    top: 40%; 
+    left: 0;
+    right: 0;
+    width: 100%; 
+    text-align: center;
+    font-size: 3rem; 
+    color: var(--accent); 
+    font-weight: 900;
+    text-shadow: 0 0 20px black, 0 0 40px black; 
+    opacity: 0; 
+    pointer-events: none;
+    z-index: 30;
+    background: rgba(0,0,0,0.5);
+    padding: 20px;
+}
+
+.boss-warning.anim { 
+    animation: warningAnim 2s forwards; 
+}
+
+@keyframes warningAnim { 
+    0% { opacity:0; transform: scale(0.5); } 
+    20% { opacity:1; transform: scale(1.2); } 
+    80% { opacity:1; transform: scale(1); } 
+    100% { opacity:0; transform: scale(1.5); } 
+}
+
+/* WIN NOTIFICATION */
+.win-notification {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    background: linear-gradient(135deg, #22c55e, #16a34a);
+    padding: 30px;
+    border-radius: 20px;
+    font-size: 2rem;
+    font-weight: bold;
+    color: white;
+    z-index: 200;
+    box-shadow: 0 0 50px rgba(34, 197, 94, 0.5);
+    animation: winPop 2s forwards;
+    pointer-events: none;
+}
+
+@keyframes winPop {
+    0% { transform: translate(-50%, -50%) scale(0); }
+    10% { transform: translate(-50%, -50%) scale(1.2); }
+    20% { transform: translate(-50%, -50%) scale(1); }
+    90% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+    100% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
+}
+
     </style>
 </head>
 <body>
@@ -863,7 +955,7 @@
                     <div>Мастерская Эльфов</div>
                     <div class="idle-amount">+<span id="ui-idle-bank">0</span> 🟡</div>
                     <div style="font-size:0.7rem; opacity:0.7">
-                                        <span id="ui-elves-count">0</span> эльфов 
+                        <span id="ui-elves-count">0</span> эльфов 
                         (<span id="ui-idle-rate">0</span>/сек)
                     </div>
                 </div>
@@ -884,7 +976,7 @@
                 <!-- JS Injected content -->
             </div>
 
-            <!-- BOTTOM PLAY BUTTON - ТЕПЕРЬ FIXED -->
+            <!-- BOTTOM PLAY BUTTON -->
             <div class="play-container interactive">
                 <button class="btn big-play-btn" onclick="Game.startRequest()">ИГРАТЬ</button>
                 <button class="btn btn-small" style="flex:1; background: #334155;" onclick="UI.openModal('quest-modal')">📜</button>
@@ -1008,7 +1100,7 @@
                 </div>
             </div>
             
-            <!-- ROULETTE - ИСПРАВЛЕНО -->
+            <!-- ROULETTE -->
             <div id="roulette-game" class="minigame-container" style="display: none;">
                 <div class="roulette-container">
                     <div class="roulette-pointer">⬇️</div>
@@ -1032,7 +1124,7 @@
                 </div>
             </div>
             
-            <button class="btn btn-small" style="margin-top: 15px;" onclick="UI.closeAllModals()">Закрыть</button>
+            <button class="btn btn-small" style="margin-top: 15px;" onclick="Game.returnToMenu()">ЗАКРЫТЬ И В МЕНЮ</button>
         </div>
 
         <!-- MODAL: DAILY BONUS -->
@@ -1264,19 +1356,6 @@ const TUTORIAL_STEPS = [
         desc: "Через 30 секунд появится Гринч! Уворачивайся от снежков, потом кидай в него подарки, чтобы победить!",
     }
 ];
-
-const LOADING_TIPS = [
-    "💡 Используй SPACE для активации супер-способности!",
-    "🧲 Магнит работает только когда ты поймаешь бонус!",
-    "🔥 Собирай подарки подряд для увеличения комбо!",
-    "👹 У Гринча 100 HP - качай урон!",
-    "🐕 Лекси помогает собирать подарки автоматически!",
-    "🏭 Эльфы приносят пассивный доход!",
-    "🎰 Играй в мини-игры для бонусов!",
-    "🏆 Выполняй достижения для наград!",
-    "📜 Следи за квестами - они приносят много монет!"
-];
-
 /* ============================================
    LOADING & TUTORIAL SYSTEM
    ============================================ */
@@ -1289,7 +1368,6 @@ const LoadingSystem = {
         if (isFirstTime) {
             await this.showStory();
         } else {
-            // Быстрая загрузка для повторного входа
             await this.quickLoad();
         }
         
@@ -1413,7 +1491,7 @@ const Meta = {
     },
     
     init() {
-        const s = localStorage.getItem('ny_ultimate_v4');
+        const s = localStorage.getItem('ny_ultimate_v7');
         if (s) {
             this.data = JSON.parse(s);
             if (!this.data.quests || this.data.quests.length === 0) {
@@ -1436,7 +1514,7 @@ const Meta = {
     },
     
     save() { 
-        localStorage.setItem('ny_ultimate_v4', JSON.stringify(this.data)); 
+        localStorage.setItem('ny_ultimate_v7', JSON.stringify(this.data)); 
         UI.updateMenu(); 
     },
     
@@ -1643,7 +1721,6 @@ const Meta = {
         this.checkAchievements();
     }
 };
-
 /* ============================================
    MINI GAMES
    ============================================ */
@@ -1749,19 +1826,18 @@ const MiniGame = {
         
         const wheel = document.getElementById('roulette-wheel');
         
-        // Сброс предыдущего вращения
         wheel.style.transition = 'none';
         wheel.style.transform = 'rotate(0deg)';
-        void wheel.offsetWidth; // Принудительный reflow
+        void wheel.offsetWidth;
         
         const rand = Math.random();
         let sector;
         
-        if (rand < 0.35) sector = 0; // x0 (35%)
-        else if (rand < 0.60) sector = 1; // x2 (25%)
-        else if (rand < 0.80) sector = 2; // x3 (20%)
-        else if (rand < 0.95) sector = 3; // x5 (15%)
-        else sector = 4; // x10 (5%)
+        if (rand < 0.35) sector = 0;
+        else if (rand < 0.60) sector = 1;
+        else if (rand < 0.80) sector = 2;
+        else if (rand < 0.95) sector = 3;
+        else sector = 4;
         
         const multipliers = [0, 2, 3, 5, 10, 0];
         
@@ -1769,8 +1845,6 @@ const MiniGame = {
             sector = 5;
         }
         
-        // 6 секторов по 60 градусов каждый
-        // Стрелка указывает вверх (0°), поэтому нужно правильно рассчитать угол
         const sectorAngle = 60;
         const targetAngle = sector * sectorAngle + (Math.random() * 40 - 20);
         const fullRotations = 360 * 5;
@@ -1888,7 +1962,6 @@ const Weather = {
         this.start(random);
     }
 };
-
 /* ============================================
    GAME ENGINE
    ============================================ */
@@ -1902,8 +1975,9 @@ class GameEngine {
         this.input = { x: 0, y: 0, active: false };
         this.keys = { left: false, right: false };
         
+        // ИСПРАВЛЕНО: Управление работает ВСЕГДА
         const inputMove = (x, y) => { 
-            if(this.running && !this.bossBattleMode) { 
+            if(this.running) { 
                 const rect = this.canvas.getBoundingClientRect();
                 this.input.x = Math.max(30, Math.min(this.width-30, x - rect.left)); 
                 this.input.y = y - rect.top;
@@ -1942,7 +2016,7 @@ class GameEngine {
             inputEnd();
         }, {passive:false});
 
-        // ИСПРАВЛЕНО: Click для разбития льда
+        // Click для разбития льда
         const inputClick = (cx, cy) => {
             if (!this.running) return;
             const rect = this.canvas.getBoundingClientRect();
@@ -2070,7 +2144,6 @@ class GameEngine {
         requestAnimationFrame(this.loop);
     }
 
-    // ИСПРАВЛЕНО: Обработка кликов по льду
     handleInputClick(x, y) {
         for (let i = this.objects.length - 1; i >= 0; i--) {
             let obj = this.objects[i];
@@ -2078,7 +2151,7 @@ class GameEngine {
                 const dx = x - obj.x;
                 const dy = y - obj.y;
                 const dist = Math.sqrt(dx*dx + dy*dy);
-                if (dist < 50) { // Радиус клика
+                if (dist < 50) {
                     obj.type = 'GIFT';
                     obj.visual = obj.subType;
                     AudioSys.play('shatter');
@@ -2151,11 +2224,16 @@ class GameEngine {
         if (!this.running) return;
         const dt = (t - this.lastTime) / 1000;
         this.lastTime = t;
+        
+        if (dt > 0.1) {
+            requestAnimationFrame(this.loop);
+            return;
+        }
+        
         this.update(dt);
         this.draw();
         requestAnimationFrame(this.loop);
     }
-
     update(dt) {
         this.gameTime += dt;
         
@@ -2209,54 +2287,32 @@ class GameEngine {
             }
         }
         
-        // Player Movement
-        if (!this.bossBattleMode) {
-            const speed = this.stats.speed * dt;
-            let dx = 0;
-            
-            if (this.keys.left) { 
-                this.player.x -= speed; 
-                dx = -1; 
+        // ИСПРАВЛЕНО: Player Movement - ВСЕГДА РАБОТАЕТ
+        const speed = this.bossBattleMode ? this.stats.speed * dt * 0.7 : this.stats.speed * dt;
+        let dx = 0;
+        
+        if (this.keys.left) { 
+            this.player.x -= speed; 
+            dx = -1; 
+        }
+        else if (this.keys.right) { 
+            this.player.x += speed; 
+            dx = 1; 
+        }
+        else if (this.input.active) {
+            const diff = this.input.x - this.player.x;
+            if (Math.abs(diff) > 5) { 
+                this.player.x += Math.sign(diff) * Math.min(Math.abs(diff), speed * 1.5); 
+                dx = Math.sign(diff); 
             }
-            else if (this.keys.right) { 
-                this.player.x += speed; 
-                dx = 1; 
-            }
-            else if (this.input.active) {
-                const diff = this.input.x - this.player.x;
-                if (Math.abs(diff) > 5) { 
-                    this.player.x += Math.sign(diff) * Math.min(Math.abs(diff), speed * 1.5); 
-                    dx = Math.sign(diff); 
-                }
-            }
-            
-            this.player.x = Math.max(30, Math.min(this.width-30, this.player.x));
-            this.player.angle += (dx * 0.3 - this.player.angle) * 10 * dt;
+        }
+        
+        this.player.x = Math.max(30, Math.min(this.width-30, this.player.x));
+        this.player.angle += (dx * 0.3 - this.player.angle) * 10 * dt;
 
+        if (!this.bossBattleMode) {
             this.trail.push({x:this.player.x, y:this.height-20, alpha:0.8});
             if(this.trail.length > 10) this.trail.shift();
-        } else {
-            const speed = this.stats.speed * dt * 0.5;
-            let dx = 0;
-            
-            if (this.keys.left) { 
-                this.player.x -= speed; 
-                dx = -1; 
-            }
-            else if (this.keys.right) { 
-                this.player.x += speed; 
-                dx = 1; 
-            }
-            else if (this.input.active) {
-                const diff = this.input.x - this.player.x;
-                if (Math.abs(diff) > 5) { 
-                    this.player.x += Math.sign(diff) * Math.min(Math.abs(diff), speed); 
-                    dx = Math.sign(diff); 
-                }
-            }
-            
-            this.player.x = Math.max(30, Math.min(this.width-30, this.player.x));
-            this.player.angle += (dx * 0.3 - this.player.angle) * 10 * dt;
         }
 
         // Boss Logic
@@ -2267,7 +2323,6 @@ class GameEngine {
         if (this.boss.active && this.boss.phase === 'flying') {
             this.boss.timer -= dt;
             
-            // ИСПРАВЛЕНО: Правильная траектория босса
             this.boss.x += 150 * this.boss.dir * dt;
             if (this.boss.x < 100 || this.boss.x > this.width - 100) {
                 this.boss.dir *= -1;
@@ -2277,12 +2332,8 @@ class GameEngine {
             this.boss.y = 80;
 
             if (this.boss.timer <= 0) {
-                // Небольшая задержка перед битвой чтобы избежать лага
-                setTimeout(() => {
-                    if (this.running) {
-                        this.startBossBattle();
-                    }
-                }, 100);
+                this.boss.timer = 0;
+                this.startBossBattle();
             }
         }
         
@@ -2295,11 +2346,18 @@ class GameEngine {
             this.handleSpawning(dt);
         }
 
-        // Objects Update
+        // ИСПРАВЛЕНО: Objects Update с направленным движением
         const speedMult = this.powerups.slow.active ? 0.5 : 1;
         for (let i = this.objects.length - 1; i >= 0; i--) {
             let obj = this.objects[i];
-            obj.y += obj.speed * speedMult * dt;
+            
+            if (obj.vx !== undefined && obj.vy !== undefined) {
+                obj.x += obj.vx * speedMult * dt;
+                obj.y += obj.vy * speedMult * dt;
+            } else {
+                obj.y += obj.speed * speedMult * dt;
+            }
+            
             obj.angle += obj.rot * dt;
 
             if (obj.type === 'GIFT' && this.powerups.magnet.active && obj.y > this.height/2) {
@@ -2310,7 +2368,7 @@ class GameEngine {
                 }
             }
 
-            if (obj.y > this.height) {
+            if (obj.y > this.height || obj.x < -50 || obj.x > this.width + 50) {
                 this.objects.splice(i, 1);
                 if (obj.type === 'GIFT') {
                     this.combo = 0;
@@ -2411,7 +2469,6 @@ class GameEngine {
     }
 
     updateBossBattle(dt) {
-        // ИСПРАВЛЕНО: Правильное движение босса в битве
         this.boss.x += Math.sin(this.gameTime * 1.5) * 100 * dt;
         this.boss.x = Math.max(100, Math.min(this.width - 100, this.boss.x));
         
@@ -2420,19 +2477,19 @@ class GameEngine {
         if (this.boss.attackTimer >= 1.5) {
             this.boss.attackTimer = 0;
             
-            // Стреляем в сторону игрока
             const angle = Math.atan2((this.height - 80) - this.boss.y, this.player.x - this.boss.x);
+            const speed = 200;
             
             this.objects.push({
                 x: this.boss.x,
                 y: this.boss.y + 40,
                 type: 'BAD',
                 visual: ASSETS.BOSS_PROJ,
-                speed: 350,
+                speed: 0,
                 angle: 0,
                 rot: 0,
-                vx: Math.cos(angle) * 200,
-                vy: Math.sin(angle) * 200
+                vx: Math.cos(angle) * speed,
+                vy: Math.sin(angle) * speed
             });
         }
     }
@@ -2536,7 +2593,6 @@ class GameEngine {
         this.lastCatchTime = performance.now();
         UI.updateCombo(this.combo);
     }
-
     handleCollision(obj) {
         if (obj.type === 'GIFT') {
             AudioSys.play('catch');
@@ -2633,6 +2689,63 @@ class GameEngine {
             }
         });
 
+        // Objects
+        this.ctx.textAlign = "center"; 
+        this.ctx.textBaseline = "middle";
+        this.ctx.shadowBlur = 0;
+        
+        this.objects.forEach(o => {
+            this.ctx.save();
+            this.ctx.translate(o.x, o.y);
+            this.ctx.rotate(o.angle);
+            
+            if (o.type === 'POWERUP') {
+                const powerupData = ASSETS.POWERUPS[o.powerupType];
+                this.ctx.shadowBlur = 20;
+                this.ctx.shadowColor = powerupData.color;
+            } else {
+                this.ctx.shadowBlur = 5;
+                this.ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+            }
+            
+            this.ctx.font = "40px Arial";
+            this.ctx.fillStyle = '#fff';
+            this.ctx.fillText(o.visual, 0, 0);
+            this.ctx.restore();
+        });
+        
+        this.ctx.shadowBlur = 0;
+
+        // Pet
+        if (this.pet) {
+            this.ctx.font = "40px Arial";
+            this.ctx.textAlign = "center";
+            this.ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+            this.ctx.shadowBlur = 5;
+            this.ctx.fillText(PETS.lexi.icon, this.pet.x, this.pet.y);
+            this.ctx.shadowBlur = 0;
+        }
+
+        // Boss
+        if (this.boss.active && (this.boss.phase === 'flying' || this.boss.phase === 'battle')) {
+            this.ctx.save();
+            this.ctx.font = "80px Arial"; 
+            this.ctx.textAlign = "center";
+            this.ctx.textBaseline = "middle";
+            
+            let offsetX = 0, offsetY = 0;
+            if (this.boss.hp < this.boss.maxHp * 0.3) {
+                offsetX = Math.sin(Date.now() * 0.05) * 3;
+                offsetY = Math.sin(Date.now() * 0.08) * 3;
+            }
+            
+            this.ctx.shadowColor = 'rgba(0, 0, 0, 0.8)';
+            this.ctx.shadowBlur = 15;
+            this.ctx.fillStyle = '#fff';
+            this.ctx.fillText(ASSETS.BOSS, this.boss.x + offsetX, this.boss.y + offsetY);
+            this.ctx.restore();
+        }
+
         // Player
         this.ctx.save();
         this.ctx.translate(this.player.x, this.height - 20);
@@ -2651,56 +2764,24 @@ class GameEngine {
         this.ctx.font = "60px Arial"; 
         this.ctx.textAlign = "center"; 
         this.ctx.textBaseline = "bottom";
-        this.ctx.shadowBlur = 0;
+        this.ctx.shadowColor = 'rgba(0, 0, 0, 0.9)';
+        this.ctx.shadowBlur = 15;
+        this.ctx.fillStyle = '#fff';
         this.ctx.fillText(this.player.skin, 0, 0);
+        this.ctx.shadowBlur = 0;
         this.ctx.restore();
         
-        // Pet
-        if (this.pet) {
-            this.ctx.font = "40px Arial";
-            this.ctx.textAlign = "center";
-            this.ctx.fillText(PETS.lexi.icon, this.pet.x, this.pet.y);
-        }
-
-        // Boss
-        if (this.boss.active && (this.boss.phase === 'flying' || this.boss.phase === 'battle')) {
-            this.ctx.font = "80px Arial"; 
-            this.ctx.textAlign = "center";
-            
-            let offsetX = 0, offsetY = 0;
-            if (this.boss.hp < this.boss.maxHp * 0.3) {
-                offsetX = Math.sin(Date.now() * 0.05) * 3;
-                offsetY = Math.sin(Date.now() * 0.08) * 3;
-            }
-            
-            this.ctx.fillText(ASSETS.BOSS, this.boss.x + offsetX, this.boss.y + offsetY);
-        }
-
-        // Objects
-        this.ctx.textAlign = "center"; 
-        this.ctx.textBaseline = "middle";
-        this.objects.forEach(o => {
-            this.ctx.save();
-            this.ctx.translate(o.x, o.y);
-            this.ctx.rotate(o.angle);
-            
-            if (o.type === 'POWERUP') {
-                const powerupData = ASSETS.POWERUPS[o.powerupType];
-                this.ctx.shadowBlur = 20;
-                this.ctx.shadowColor = powerupData.color;
-            }
-            
-            this.ctx.font = "40px Arial";
-            this.ctx.fillText(o.visual, 0, 0);
-            this.ctx.restore();
-        });
-        
-        // Boss Projectiles
-        this.ctx.shadowBlur = 0;
+        // Boss Projectiles (подарки игрока)
         this.bossProjectiles.forEach(p => {
             this.ctx.font = "30px Arial";
+            this.ctx.textAlign = "center";
+            this.ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+            this.ctx.shadowBlur = 5;
+            this.ctx.fillStyle = '#fff';
             this.ctx.fillText(p.visual, p.x, p.y);
         });
+        
+        this.ctx.shadowBlur = 0;
 
         // Particles
         this.particles.forEach(p => { 
@@ -2855,7 +2936,6 @@ const UI = {
         event.target.classList.add('active');
         this.renderContent();
     },
-    
     renderContent() {
         const grid = document.getElementById('grid-content');
         grid.innerHTML = '';
@@ -2914,7 +2994,7 @@ const UI = {
                 card.innerHTML = `
                     <h3>${f.name} <span class="lvl-badge">x${count}</span></h3>
                     <div class="icon">${f.icon}</div>
-                                        <div style="font-size:0.8rem; color:#22c55e">+${f.income}/сек</div>
+                    <div style="font-size:0.8rem; color:#22c55e">+${f.income}/сек</div>
                     <button class="btn" ${!canAfford ? 'disabled' : ''} 
                         onclick="Meta.buyFactory('${key}')">
                         ${cost} 🟡
@@ -3114,7 +3194,10 @@ window.onload = () => {
     UI.init();
     LoadingSystem.start();
 };
+
 </script>
 </body>
 </html>
+
+
 
