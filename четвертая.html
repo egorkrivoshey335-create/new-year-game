@@ -1,0 +1,1974 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Новогодний Сбор: Ultimate Edition</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --primary: #0ea5e9;
+            --accent: #f43f5e;
+            --gold: #fbbf24;
+            --green: #22c55e;
+            --text: #f8fafc;
+            --panel-bg: rgba(15, 23, 42, 0.95);
+            --font-main: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        * { box-sizing: border-box; touch-action: none; user-select: none; -webkit-user-select: none; }
+
+	*::-webkit-scrollbar { display: none; width: 0; height: 0; }
+        
+        body {
+            margin: 0; padding: 0;
+            background: var(--bg-color);
+            color: var(--text);
+            font-family: var(--font-main);
+            overflow: hidden;
+            height: 100vh;
+            display: flex; justify-content: center; align-items: center;
+        }
+
+        #game-container {
+            position: relative;
+            width: 100%; max-width: 600px; height: 100%;
+            background: linear-gradient(to bottom, #0b1026 0%, #2b32b2 100%);
+            overflow: hidden;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+            cursor: crosshair;
+        }
+
+        canvas { display: block; width: 100%; height: 100%; }
+
+        /* UI LAYERS */
+        .ui-layer {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            display: flex; flex-direction: column;
+            pointer-events: none; 
+            transition: opacity 0.3s ease, visibility 0.3s;
+            opacity: 1;
+            visibility: visible;
+            z-index: 10;
+        }
+        
+        .ui-layer.hidden { 
+            opacity: 0; 
+            visibility: hidden; 
+            z-index: -1; 
+        }
+
+        .interactive, .btn, .modal, .shop-item, .card { pointer-events: all; }
+
+        /* MENU */
+        #menu-screen {
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(8px);
+            justify-content: flex-start;
+            align-items: center;
+            text-align: center;
+            pointer-events: all;
+            overflow-y: auto;
+            padding: 20px 0;
+        }
+        
+        .logo { 
+            font-size: 2.5rem; 
+            font-weight: 900; 
+            color: var(--gold); 
+            text-shadow: 0 0 15px var(--accent); 
+            margin-bottom: 15px; 
+            animation: float 3s ease-in-out infinite; 
+        }
+        
+        .header-stats {
+            display: flex; 
+            gap: 15px; 
+            width: 90%; 
+            justify-content: center;
+            background: rgba(255,255,255,0.1); 
+            padding: 12px; 
+            border-radius: 15px;
+            margin-bottom: 15px; 
+            font-weight: bold;
+        }
+
+        .stats-box { 
+            background: rgba(255,255,255,0.1); 
+            padding: 10px 20px; 
+            border-radius: 12px; 
+            margin: 10px 0; 
+            min-width: 280px; 
+        }
+
+        /* IDLE BOX */
+        .idle-box {
+            background: linear-gradient(45deg, #1e293b, #334155);
+            width: 90%; 
+            padding: 15px; 
+            border-radius: 15px; 
+            margin-bottom: 15px;
+            border: 1px solid rgba(255,255,255,0.1); 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center;
+        }
+        .idle-info div:first-child { font-size: 0.8rem; color: #94a3b8; }
+        .idle-amount { font-size: 1.4rem; color: var(--green); font-weight: bold; }
+
+        /* TABS */
+        .tabs { 
+            display: flex; 
+            gap: 5px; 
+            margin-bottom: 10px; 
+            background: rgba(0,0,0,0.3); 
+            padding: 5px; 
+            border-radius: 20px; 
+        }
+        .tab-btn {
+            background: none; 
+            border: none; 
+            color: #888; 
+            padding: 8px 15px;
+            font-weight: bold; 
+            border-radius: 15px; 
+            transition: 0.2s;
+            cursor: pointer;
+        }
+        .tab-btn.active { 
+            background: var(--primary); 
+            color: white; 
+            box-shadow: 0 2px 10px rgba(59, 130, 246, 0.4); 
+        }
+
+        /* CARDS GRID */
+        .card-grid { 
+            display: grid; 
+            grid-template-columns: 1fr 1fr; 
+            gap: 10px; 
+            width: 90%; 
+            padding-bottom: 100px;
+            margin-bottom: 20px;
+        }
+        .card {
+            background: rgba(255,255,255,0.08); 
+            padding: 10px; 
+            border-radius: 12px;
+            text-align: center; 
+            border: 1px solid rgba(255,255,255,0.1);
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: space-between;
+        }
+        .card h3 { margin: 5px 0; font-size: 0.9rem; }
+        .card .icon { font-size: 2rem; margin: 5px 0; }
+        .lvl-badge { 
+            font-size: 0.7rem; 
+            background: #333; 
+            padding: 2px 6px; 
+            border-radius: 4px; 
+            color: #aaa; 
+        }
+
+        /* BUTTONS */
+        .btn {
+            background: linear-gradient(135deg, #ff512f 0%, #dd2476 100%);
+            border: none; 
+            padding: 15px 40px; 
+            color: white;
+            font-size: 1.2rem; 
+            font-weight: bold; 
+            border-radius: 30px;
+            cursor: pointer; 
+            margin: 5px;
+            box-shadow: 0 4px 15px rgba(221, 36, 118, 0.4);
+            transition: transform 0.1s;
+        }
+        .btn:active { transform: scale(0.95); }
+        .btn-small { 
+            padding: 8px 16px; 
+            font-size: 0.9rem; 
+            background: rgba(255,255,255,0.2); 
+            box-shadow: none; 
+        }
+        .btn-shop { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); }
+        .btn.green { 
+            background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%); 
+            box-shadow: 0 4px 0 #15803d; 
+        }
+        .btn:disabled { 
+            filter: grayscale(1); 
+            opacity: 0.6; 
+            cursor: not-allowed;
+            transform: scale(1);
+        }
+
+        /* PLAY BUTTON CONTAINER */
+        .play-container {
+            position: fixed; 
+            bottom: 20px; 
+            width: 90%; 
+            max-width: 560px;
+            display: flex; 
+            gap: 10px;
+            z-index: 50;
+        }
+        .big-play-btn {
+            flex: 2; 
+            font-size: 1.5rem; 
+            padding: 20px;
+            background: linear-gradient(to right, #f59e0b, #d97706);
+            box-shadow: 0 6px 0 #b45309;
+        }
+
+        /* HUD */
+        #hud-screen { 
+            justify-content: space-between; 
+            padding: 15px; 
+            pointer-events: none; 
+        }
+        .hud-top { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: flex-start; 
+            width: 100%;
+        }
+        .hearts-container { font-size: 1.5rem; letter-spacing: 5px; }
+        .score-container { 
+            font-size: 2rem; 
+            font-weight: 800; 
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5); 
+        }
+        
+        /* COMBO SYSTEM */
+        .combo-display {
+            position: absolute;
+            top: 100px;
+            right: 20px;
+            background: rgba(0,0,0,0.8);
+            padding: 10px 15px;
+            border-radius: 12px;
+            border: 2px solid var(--gold);
+            font-size: 1.2rem;
+            font-weight: bold;
+            display: none;
+            animation: pulse 0.5s infinite;
+        }
+        .combo-display.show { display: block; }
+        
+        /* ACTIVE POWERUPS DISPLAY */
+        .powerups-display {
+            position: absolute;
+            top: 60px;
+            left: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        .powerup-indicator {
+            background: rgba(0,0,0,0.7);
+            padding: 5px 10px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            border: 2px solid;
+            animation: pulse 1s infinite;
+        }
+        .powerup-indicator.shield { border-color: #3b82f6; }
+        .powerup-indicator.magnet { border-color: #f59e0b; }
+        .powerup-indicator.double { border-color: #22c55e; }
+        .powerup-indicator.slow { border-color: #a855f7; }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        
+        /* BOSS HP BAR */
+        .boss-hp-bar {
+            position: absolute; 
+            top: 70px; 
+            left: 50%; 
+            transform: translateX(-50%);
+            width: 250px; 
+            height: 20px; 
+            background: #333; 
+            border-radius: 10px;
+            display: none; 
+            overflow: hidden; 
+            border: 2px solid #fff;
+        }
+        .boss-hp-fill { 
+            width: 100%; 
+            height: 100%; 
+            background: linear-gradient(90deg, #ef4444, #dc2626); 
+            transition: width 0.3s; 
+        }
+        .boss-name {
+            position: absolute;
+            top: 45px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-weight: bold;
+            font-size: 1.2rem;
+            color: var(--accent);
+            text-shadow: 0 2px 4px black;
+            display: none;
+        }
+
+        /* BOSS BATTLE MODE */
+        .boss-battle-controls {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: none;
+            pointer-events: all;
+        }
+        .throw-btn {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            border: 4px solid white;
+            font-size: 2rem;
+            cursor: pointer;
+            transition: 0.1s;
+            box-shadow: 0 4px 15px rgba(245, 158, 11, 0.5);
+        }
+        .throw-btn:active {
+            transform: scale(0.9);
+        }
+
+        /* ULTIMATE BUTTON */
+        .ult-bar-container {
+            position: absolute; 
+            bottom: 20px; 
+            right: 20px; 
+            width: 80px; 
+            height: 80px;
+            pointer-events: all;
+        }
+        .ult-btn {
+            width: 100%; 
+            height: 100%; 
+            border-radius: 50%; 
+            border: 4px solid #fff;
+            background: rgba(0,0,0,0.5); 
+            color: white; 
+            font-weight: bold;
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            flex-direction: column;
+            overflow: hidden; 
+            position: relative; 
+            font-size: 0.8rem;
+            cursor: pointer;
+        }
+        .ult-fill {
+            position: absolute; 
+            bottom: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 0%;
+            background: linear-gradient(to top, #3b82f6, #60a5fa);
+            transition: height 0.2s; 
+            z-index: -1;
+        }
+        .ult-ready { 
+            animation: glow 1s infinite alternate; 
+            border-color: #60a5fa; 
+        }
+        @keyframes glow { 
+            from { box-shadow: 0 0 10px #3b82f6; } 
+            to { box-shadow: 0 0 25px #60a5fa; } 
+        }
+
+        /* MODALS */
+        .modal {
+            position: absolute; 
+            top: 50%; 
+            left: 50%; 
+            transform: translate(-50%, -50%);
+            background: var(--panel-bg); 
+            padding: 25px; 
+            border-radius: 20px;
+            width: 90%; 
+            max-width: 400px; 
+            text-align: center;
+            border: 2px solid var(--primary);
+            box-shadow: 0 0 50px rgba(14, 165, 233, 0.2);
+            display: none; 
+            z-index: 100;
+        }
+        .modal.open { display: block; animation: popIn 0.3s; }
+        
+        /* QUEST LIST */
+        .quest-list {
+            max-height: 300px;
+            overflow-y: auto;
+            margin: 15px 0;
+        }
+        .quest-item {
+            background: rgba(255,255,255,0.05);
+            padding: 12px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            border-left: 4px solid var(--primary);
+        }
+        .quest-item.completed {
+            border-left-color: var(--green);
+            opacity: 0.7;
+        }
+        .quest-progress-bar {
+            background: #333;
+            height: 8px;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 5px;
+        }
+        .quest-progress-fill {
+            height: 100%;
+            background: var(--primary);
+            transition: width 0.3s;
+        }
+        
+        /* EFFECTS */
+        @keyframes float { 
+            0%, 100% { transform: translateY(0); } 
+            50% { transform: translateY(-10px); } 
+        }
+        @keyframes popIn { 
+            from { transform: translate(-50%, -40%); opacity: 0; } 
+            to { transform: translate(-50%, -50%); opacity: 1; } 
+        }
+        
+        #blizzard-overlay {
+            position: absolute; 
+            top:0; 
+            left:0; 
+            width:100%; 
+            height:100%;
+            background: rgba(255,255,255,0.4);
+            pointer-events: none; 
+            opacity: 0; 
+            transition: opacity 2s; 
+            z-index: 5;
+        }
+        #blizzard-overlay.active { opacity: 1; }
+        
+        #flash-overlay {
+            position: absolute; 
+            top:0; 
+            left:0; 
+            width:100%; 
+            height:100%;
+            pointer-events: none; 
+            opacity: 0; 
+            z-index: 20; 
+            transition: opacity 0.1s;
+        }
+        
+        .float-text {
+            position: absolute; 
+            font-weight: bold; 
+            color: #fff;
+            text-shadow: 0 2px 0 #000; 
+            pointer-events: none;
+            animation: floatUp 1s forwards;
+            z-index: 30;
+        }
+        @keyframes floatUp { 
+            from { transform: translateY(0) scale(1); opacity: 1; } 
+            to { transform: translateY(-50px) scale(1.5); opacity: 0; } 
+        }
+        
+        .boss-warning {
+            position: absolute; 
+            top: 40%; 
+            width: 100%; 
+            text-align: center;
+            font-size: 3rem; 
+            color: var(--accent); 
+            font-weight: 900;
+            text-shadow: 0 0 20px black; 
+            opacity: 0; 
+            pointer-events: none;
+            z-index: 30;
+        }
+        .boss-warning.anim { animation: warningAnim 2s forwards; }
+        @keyframes warningAnim { 
+            0% { opacity:0; transform: scale(0.5); } 
+            20% { opacity:1; transform: scale(1.2); } 
+            80% { opacity:1; transform: scale(1); } 
+            100% { opacity:0; transform: scale(1.5); } 
+        }
+    </style>
+</head>
+<body>
+
+    <div id="game-container">
+        <canvas id="gameCanvas"></canvas>
+        <div id="blizzard-overlay"></div>
+        <div id="flash-overlay"></div>
+        <div id="boss-warning-text" class="boss-warning">👹 ГРИНЧ!</div>
+
+        <!-- SCREEN: MENU -->
+        <div id="menu-screen" class="ui-layer">
+            <div class="logo">🎅 НОВОГОДНИЙ<br>СБОР</div>
+            
+            <div class="header-stats">
+                <div style="color:var(--gold)">🟡 <span id="menu-wallet">0</span></div>
+                <div style="color:var(--accent)">❤️ <span id="menu-attempts">4/4</span></div>
+                <div>🏆 <span id="menu-best">0</span></div>
+            </div>
+
+            <!-- IDLE SECTION -->
+            <div class="idle-box interactive">
+                <div class="idle-info">
+                    <div>Мастерская Эльфов</div>
+                    <div class="idle-amount">+<span id="ui-idle-bank">0</span> 🟡</div>
+                    <div style="font-size:0.7rem; opacity:0.7">
+                        <span id="ui-elves-count">0</span> эльфов 
+                        (<span id="ui-idle-rate">0</span>/сек)
+                    </div>
+                </div>
+                <button class="btn green btn-small" onclick="Meta.claimIdle()">ЗАБРАТЬ</button>
+            </div>
+
+            <!-- TABS -->
+            <div class="tabs interactive">
+                <button class="tab-btn active" onclick="UI.switchTab('upgrades')">⚡ Навыки</button>
+                <button class="tab-btn" onclick="UI.switchTab('skins')">👕 Скины</button>
+                <button class="tab-btn" onclick="UI.switchTab('factory')">🏭 Завод</button>
+            </div>
+
+            <!-- CONTENT GRID -->
+            <div id="grid-content" class="card-grid interactive">
+                <!-- JS Injected content -->
+            </div>
+
+            <!-- BOTTOM PLAY BUTTON -->
+            <div class="play-container interactive">
+                <button class="btn big-play-btn" onclick="Game.startRequest()">ИГРАТЬ</button>
+                <button class="btn btn-small" style="flex:1; background: #334155;" onclick="UI.openModal('quest-modal')">📜</button>
+                <button class="btn btn-small" style="flex:1;" onclick="UI.openModal('daily-modal')">🎁</button>
+            </div>
+        </div>
+
+        <!-- SCREEN: HUD -->
+        <div id="hud-screen" class="ui-layer hidden">
+            <div class="hud-top">
+                <div>
+                    <div class="hearts-container" id="hud-hearts">❤️❤️❤️</div>
+                </div>
+                <div class="score-container" id="hud-score">0</div>
+            </div>
+            
+            <!-- COMBO DISPLAY -->
+            <div class="combo-display" id="combo-display">
+                COMBO x<span id="combo-mult">1</span>
+            </div>
+            
+            <!-- ACTIVE POWERUPS -->
+            <div class="powerups-display" id="powerups-display">
+                <!-- JS injected -->
+            </div>
+            
+            <!-- BOSS INFO -->
+            <div class="boss-name" id="boss-name">ГРИНЧ</div>
+            <div class="boss-hp-bar" id="boss-hp-bar">
+                <div class="boss-hp-fill" id="boss-hp-fill"></div>
+            </div>
+            
+            <!-- BOSS BATTLE CONTROLS -->
+            <div class="boss-battle-controls" id="boss-battle-controls">
+                <button class="throw-btn" onclick="Game.throwGift()">🎁</button>
+            </div>
+            
+            <!-- ULTIMATE BUTTON -->
+            <div class="ult-bar-container" onclick="Game.activateUlt()">
+                <div class="ult-btn" id="ult-btn">
+                    <div class="ult-fill" id="ult-fill"></div>
+                    <span>SUPER</span>
+                    <span style="font-size:0.6rem">SPACE</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- MODAL: GAME OVER -->
+        <div id="game-over-modal" class="modal interactive">
+            <h2 style="color: var(--accent)">ИГРА ОКОНЧЕНА</h2>
+            <p>Счёт: <strong id="go-score" style="font-size: 1.5rem">0</strong></p>
+            <p>Макс. комбо: <strong id="go-combo" style="color: var(--gold)">x0</strong></p>
+            <p>Заработано: <span id="go-earned" style="color:var(--gold)">+0 🟡</span></p>
+            <div id="quest-complete-msg" style="display:none; color:var(--green); margin: 10px 0; font-weight:bold;">
+                <!-- JS injected -->
+            </div>
+            <button class="btn" onclick="Game.returnToMenu()">В МЕНЮ</button>
+        </div>
+
+        <!-- MODAL: QUEST -->
+        <div id="quest-modal" class="modal interactive">
+            <h2>📜 Задания</h2>
+            <div class="quest-list" id="quest-list">
+                <!-- JS injected -->
+            </div>
+            <button class="btn btn-small" onclick="UI.closeAllModals()">Закрыть</button>
+        </div>
+
+        <!-- MODAL: DAILY BONUS -->
+        <div id="daily-modal" class="modal interactive">
+            <h2>Ежедневный Бонус</h2>
+            <div style="font-size: 3rem; margin: 20px;">🎁</div>
+            <p id="daily-msg">Заходи каждый день!</p>
+            <button class="btn" id="btn-claim-daily" onclick="Meta.claimDaily()">ЗАБРАТЬ</button>
+            <button class="btn btn-small" onclick="UI.closeAllModals()">Закрыть</button>
+        </div>
+
+        <!-- MODAL: NO LIVES -->
+        <div id="no-lives-modal" class="modal interactive">
+            <h2>Нет попыток!</h2>
+            <p>Жди восстановления.</p>
+            <div class="timer-display" id="modal-timer" style="font-size: 1.5rem; color: var(--primary); margin: 15px 0;">
+                00:00:00
+            </div>
+            <button class="btn btn-small" onclick="UI.closeAllModals()">Ок</button>
+        </div>
+    </div>
+
+<script>
+/* ============================================
+   AUDIO SYSTEM
+   ============================================ */
+const AudioSys = {
+    ctx: null,
+    init() { 
+        if (!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)(); 
+        if(this.ctx.state==='suspended') this.ctx.resume(); 
+    },
+    play(type) {
+        if (!this.ctx) return;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.connect(gain); 
+        gain.connect(this.ctx.destination);
+        const t = this.ctx.currentTime;
+        
+        if (type === 'catch' || type === 'coin') {
+            osc.frequency.setValueAtTime(600, t); 
+            osc.frequency.exponentialRampToValueAtTime(1200, t + 0.1);
+            gain.gain.setValueAtTime(0.1, t); 
+            gain.gain.exponentialRampToValueAtTime(0.01, t + 0.1);
+            osc.start(t); osc.stop(t + 0.1);
+        } else if (type === 'shatter') {
+            osc.type = 'square'; 
+            osc.frequency.setValueAtTime(800, t); 
+            osc.frequency.exponentialRampToValueAtTime(100, t + 0.1);
+            gain.gain.setValueAtTime(0.2, t); 
+            gain.gain.exponentialRampToValueAtTime(0.01, t + 0.15);
+            osc.start(t); osc.stop(t + 0.15);
+        } else if (type === 'hit') {
+            osc.type = 'sawtooth'; 
+            osc.frequency.setValueAtTime(100, t); 
+            osc.frequency.linearRampToValueAtTime(50, t + 0.3);
+            gain.gain.setValueAtTime(0.3, t); 
+            gain.gain.linearRampToValueAtTime(0.01, t + 0.3);
+            osc.start(t); osc.stop(t + 0.3);
+        } else if (type === 'boss_start') {
+            osc.type = 'sawtooth'; 
+            osc.frequency.setValueAtTime(100, t); 
+            osc.frequency.linearRampToValueAtTime(400, t+1);
+            gain.gain.setValueAtTime(0.2, t); 
+            gain.gain.linearRampToValueAtTime(0, t+1);
+            osc.start(t); osc.stop(t+1);
+        } else if (type === 'ult') {
+            osc.type = 'sawtooth'; 
+            osc.frequency.setValueAtTime(100, t); 
+            osc.frequency.linearRampToValueAtTime(800, t+0.5);
+            gain.gain.setValueAtTime(0.3, t); 
+            gain.gain.linearRampToValueAtTime(0, t+0.5);
+            osc.start(t); osc.stop(t+0.5);
+        } else if (type === 'powerup') {
+            osc.frequency.setValueAtTime(400, t); 
+            osc.frequency.exponentialRampToValueAtTime(800, t + 0.2);
+            gain.gain.setValueAtTime(0.15, t); 
+            gain.gain.exponentialRampToValueAtTime(0.01, t + 0.2);
+            osc.start(t); osc.stop(t + 0.2);
+        } else if (type === 'throw') {
+            osc.frequency.setValueAtTime(300, t);
+            osc.frequency.linearRampToValueAtTime(600, t + 0.1);
+            gain.gain.setValueAtTime(0.2, t);
+            gain.gain.linearRampToValueAtTime(0, t + 0.1);
+            osc.start(t); osc.stop(t + 0.1);
+        } else if (type === 'boss_hit') {
+            osc.type = 'square';
+            osc.frequency.setValueAtTime(200, t);
+            osc.frequency.exponentialRampToValueAtTime(50, t + 0.2);
+            gain.gain.setValueAtTime(0.3, t);
+            gain.gain.linearRampToValueAtTime(0, t + 0.2);
+            osc.start(t); osc.stop(t + 0.2);
+        }
+    }
+};
+
+/* ============================================
+   CONFIG & DATA
+   ============================================ */
+const UPGRADES = {
+    speed: { name: "Скороходы", icon: "👟", base: 500, inc: 100, cost: 200, max: 5, desc: "+Скорость бега" },
+    luck:  { name: "Удача", icon: "🍀", base: 1, inc: 0.2, cost: 500, max: 5, desc: "Больше бонусов" },
+    magnet:{ name: "Магнит+", icon: "🧲", base: 0, inc: 0, cost: 300, max: 5, desc: "Радиус магнита" },
+    time:  { name: "Время+", icon: "⏳", base: 5, inc: 2, cost: 400, max: 5, desc: "Бонусы дольше" },
+    damage: { name: "Сила", icon: "💪", base: 1, inc: 1, cost: 600, max: 5, desc: "Урон боссу" }
+};
+
+const SKINS = {
+    'santa': { id: 'santa', icon: '🎅', name: 'Санта', cost: 0 },
+    'snowman': { id: 'snowman', icon: '⛄', name: 'Снеговик', cost: 2000 },
+    'deer': { id: 'deer', icon: '🦌', name: 'Рудольф', cost: 5000 },
+    'ninja': { id: 'ninja', icon: '🥷', name: 'Ниндзя', cost: 8000 },
+    'rocket': { id: 'rocket', icon: '🚀', name: 'Ракета', cost: 15000 }
+};
+
+const FACTORY = {
+    elf: { name: "Эльф-Рабочий", icon: "👷", baseCost: 100, income: 1 },
+    machine: { name: "Упаковщик", icon: "⚙️", baseCost: 1000, income: 12 }
+};
+
+const ASSETS = {
+    GIFTS: ["🎁", "🧸", "🍬", "🍊", "🚂"],
+    BAD: ["⚫", "💩"],
+    ICE: "🧊",
+    BOSS: "👺",
+    BOSS_PROJ: "❄️",
+    POWERUPS: {
+        shield: { icon: "🛡️", color: "#3b82f6", name: "ЩИТ" },
+        magnet: { icon: "🧲", color: "#f59e0b", name: "МАГНИТ" },
+        double: { icon: "✖️2", color: "#22c55e", name: "x2" },
+        slow: { icon: "🐌", color: "#a855f7", name: "ЗАМЕДЛЕНИЕ" }
+    }
+};
+
+const CONFIG = {
+    GAME_WIDTH: 600, 
+    GAME_HEIGHT: 800,
+    BOSS_TIME: 30,
+    BOSS_BATTLE_DURATION: 20,
+    MAX_ATTEMPTS: 4,
+    POWERUP_DURATION: 8,
+    COMBO_TIMEOUT: 2
+};
+
+// QUEST TEMPLATES
+const QUEST_TEMPLATES = [
+    { id: 1, desc: "Поймай 50 подарков", target: 50, reward: 300, type: 'gifts' },
+    { id: 2, desc: "Набери 500 очков", target: 500, reward: 400, type: 'score' },
+    { id: 3, desc: "Победи Гринча 1 раз", target: 1, reward: 500, type: 'boss' },
+    { id: 4, desc: "Поймай 3 бонуса", target: 3, reward: 250, type: 'powerups' },
+    { id: 5, desc: "Разбей 10 льдинок", target: 10, reward: 200, type: 'ice' },
+    { id: 6, desc: "Набери комбо x5", target: 5, reward: 350, type: 'combo' },
+    { id: 7, desc: "Играй 60 секунд", target: 60, reward: 300, type: 'time' },
+    { id: 8, desc: "Поймай 100 подарков", target: 100, reward: 600, type: 'gifts' },
+    { id: 9, desc: "Набери 1000 очков", target: 1000, reward: 800, type: 'score' },
+    { id: 10, desc: "Победи Гринча 3 раза", target: 3, reward: 1000, type: 'boss' }
+];
+
+/* ============================================
+   META DATA MANAGER
+   ============================================ */
+const Meta = {
+    data: { 
+        attempts: 4, 
+        nextRefill: 0, 
+        wallet: 0, 
+        bestScore: 0, 
+        upgrades: { speed: 0, luck: 0, magnet: 0, time: 0, damage: 0 },
+        skins: ['santa'], 
+        currentSkin: 'santa', 
+        factory: { elf: 0, machine: 0 },
+        lastIdleCheck: Date.now(),
+        idleBank: 0,
+        quests: [
+            { id: 1, progress: 0, completed: false }
+        ],
+        questsCompleted: 0,
+        stats: {
+            totalGifts: 0,
+            totalBosses: 0,
+            maxCombo: 0
+        },
+        lastLogin: 0 
+    },
+    
+    init() {
+        const s = localStorage.getItem('ny_ultimate_v1');
+        if (s) {
+            this.data = JSON.parse(s);
+            // Ensure quests array exists
+            if (!this.data.quests || this.data.quests.length === 0) {
+                this.data.quests = [{ id: 1, progress: 0, completed: false }];
+            }
+            if (!this.data.stats) {
+                this.data.stats = { totalGifts: 0, totalBosses: 0, maxCombo: 0 };
+            }
+        }
+        this.checkRefill();
+        this.calcIdle();
+        setInterval(() => this.calcIdle(), 1000);
+    },
+    
+    save() { 
+        localStorage.setItem('ny_ultimate_v1', JSON.stringify(this.data)); 
+        UI.updateMenu(); 
+    },
+    
+    checkRefill() {
+        const now = Date.now();
+        if (this.data.attempts < 4 && now > this.data.nextRefill) {
+            this.data.attempts++;
+            this.data.nextRefill = (this.data.attempts < 4) ? now + (8*3600*1000) : 0;
+            this.save(); 
+            this.checkRefill();
+        }
+    },
+    
+    calcIdle() {
+        const now = Date.now();
+        const dt = (now - this.data.lastIdleCheck) / 1000;
+        if (dt >= 1) {
+            const incomePerSec = (this.data.factory.elf * FACTORY.elf.income) + 
+                                 (this.data.factory.machine * FACTORY.machine.income);
+            if (incomePerSec > 0) {
+                this.data.idleBank += incomePerSec * dt;
+            }
+            this.data.lastIdleCheck = now;
+            this.save();
+        }
+        this.checkRefill();
+    },
+    
+    claimIdle() {
+        if (this.data.idleBank >= 1) {
+            const amount = Math.floor(this.data.idleBank);
+            this.data.wallet += amount;
+            this.data.idleBank = 0;
+            AudioSys.play('coin');
+            this.save();
+        }
+    },
+    
+    addScore(s) {
+        this.data.wallet += s;
+        if (s > this.data.bestScore) this.data.bestScore = s;
+        this.save();
+    },
+    
+    buyUpgrade(key) {
+        const lvl = this.data.upgrades[key];
+        if (lvl >= UPGRADES[key].max) return;
+        const cost = Math.floor(UPGRADES[key].cost * Math.pow(1.5, lvl));
+        if (this.data.wallet >= cost) {
+            this.data.wallet -= cost;
+            this.data.upgrades[key]++;
+            this.save();
+            UI.renderContent();
+        }
+    },
+    
+    buyFactory(key) {
+        const count = this.data.factory[key];
+        const cost = Math.floor(FACTORY[key].baseCost * Math.pow(1.2, count));
+        if (this.data.wallet >= cost) {
+            this.data.wallet -= cost;
+            this.data.factory[key]++;
+            this.save();
+            UI.renderContent();
+        }
+    },
+    
+    buySkin(id) {
+        const cost = SKINS[id].cost;
+        if (this.data.skins.includes(id)) {
+            this.data.currentSkin = id;
+            this.save();
+            UI.renderContent();
+            return true;
+        } else if (this.data.wallet >= cost) {
+            this.data.wallet -= cost;
+            this.data.skins.push(id);
+            this.data.currentSkin = id;
+            this.save();
+            UI.renderContent();
+            return true;
+        }
+        return false;
+    },
+    
+    useAttempt() {
+        if (this.data.attempts > 0) {
+            if (this.data.attempts === 4) this.data.nextRefill = Date.now() + (8*3600*1000);
+            this.data.attempts--;
+            this.save(); 
+            return true;
+        }
+        return false;
+    },
+    
+    updateQuest(type, amount = 1) {
+        let anyCompleted = false;
+        this.data.quests.forEach(quest => {
+            if (quest.completed) return;
+            
+            const template = QUEST_TEMPLATES.find(t => t.id === quest.id);
+            if (template && template.type === type) {
+                quest.progress += amount;
+                if (quest.progress >= template.target && !quest.completed) {
+                    quest.completed = true;
+                    this.data.wallet += template.reward;
+                    this.data.questsCompleted++;
+                    anyCompleted = true;
+                    
+                    // Add new quest
+                    const nextQuestId = quest.id + 1;
+                    if (nextQuestId <= QUEST_TEMPLATES.length) {
+                        const exists = this.data.quests.find(q => q.id === nextQuestId);
+                        if (!exists) {
+                            this.data.quests.push({ id: nextQuestId, progress: 0, completed: false });
+                        }
+                    }
+                }
+            }
+        });
+        
+        if (anyCompleted) {
+            this.save();
+        }
+        return anyCompleted;
+    },
+    
+    claimDaily() { 
+        this.data.wallet += 200; 
+        this.save(); 
+        UI.closeAllModals(); 
+        alert('Получено 200 🟡'); 
+    }
+};
+
+/* ============================================
+   GAME ENGINE
+   ============================================ */
+class GameEngine {
+    constructor() {
+        this.canvas = document.getElementById('gameCanvas');
+        this.ctx = this.canvas.getContext('2d');
+        this.resize();
+        window.addEventListener('resize', () => this.resize());
+        
+        // Input
+        this.input = { x: 0, active: false };
+        this.keys = { left: false, right: false };
+        
+        // Movement Handlers
+        const inputMove = (x) => { 
+            if(this.running && !this.bossBattleMode) { 
+                this.input.x = Math.max(30, Math.min(this.width-30, x - this.canvas.getBoundingClientRect().left)); 
+                this.input.active = true; 
+            }
+        };
+        window.addEventListener('mousemove', e => inputMove(e.clientX));
+        this.canvas.addEventListener('touchmove', e => { 
+            e.preventDefault(); 
+            inputMove(e.touches[0].clientX); 
+        }, {passive:false});
+
+        // Click/Tap Handlers
+        const inputClick = (cx, cy) => {
+            if (!this.running) return;
+            const rect = this.canvas.getBoundingClientRect();
+            const x = cx - rect.left;
+            const y = cy - rect.top;
+            this.handleInputClick(x, y);
+        };
+        this.canvas.addEventListener('mousedown', e => inputClick(e.clientX, e.clientY));
+        this.canvas.addEventListener('touchstart', e => {
+            e.preventDefault();
+            inputClick(e.touches[0].clientX, e.touches[0].clientY);
+            inputMove(e.touches[0].clientX);
+        }, {passive:false});
+
+        // Keyboard
+        window.addEventListener('keydown', e => { 
+            if(e.key==='ArrowLeft'||e.key==='a') this.keys.left=true; 
+            if(e.key==='ArrowRight'||e.key==='d') this.keys.right=true; 
+            if(e.code==='Space') this.activateUlt();
+        });
+        window.addEventListener('keyup', e => { 
+            if(e.key==='ArrowLeft'||e.key==='a') this.keys.left=false; 
+            if(e.key==='ArrowRight'||e.key==='d') this.keys.right=false; 
+        });
+
+        this.player = { x: 0, angle: 0, skin: '🎅' };
+        this.running = false;
+        this.bossBattleMode = false;
+        this.loop = this.loop.bind(this);
+    }
+
+    resize() {
+        const r = document.getElementById('game-container').getBoundingClientRect();
+        this.canvas.width = this.width = r.width;
+        this.canvas.height = this.height = r.height;
+    }
+
+    start() {
+        AudioSys.init();
+        this.running = true;
+        this.score = 0;
+        this.lives = 3;
+        this.gameTime = 0;
+        this.objects = [];
+        this.particles = [];
+        this.trail = [];
+        this.ultCharge = 0;
+        this.lastTime = performance.now();
+        this.bossBattleMode = false;
+        
+        // Combo system
+        this.combo = 0;
+        this.maxCombo = 0;
+        this.lastCatchTime = 0;
+        
+        // Session stats
+        this.sessionStats = {
+            gifts: 0,
+            powerups: 0,
+            ice: 0,
+            bosses: 0
+        };
+        
+        this.player.x = this.width/2;
+        this.player.skin = SKINS[Meta.data.currentSkin].icon;
+        
+        // POWERUPS STATE
+        this.powerups = {
+            shield: { active: false, timer: 0 },
+            magnet: { active: false, timer: 0 },
+            double: { active: false, timer: 0 },
+            slow: { active: false, timer: 0 }
+        };
+        
+        // Stats from upgrades
+        this.stats = {
+            speed: UPGRADES.speed.base + (Meta.data.upgrades.speed * UPGRADES.speed.inc),
+            magnetLevel: Meta.data.upgrades.magnet,
+            luck: 1 + (Meta.data.upgrades.luck * UPGRADES.luck.inc),
+            powerupTime: CONFIG.POWERUP_DURATION + (Meta.data.upgrades.time * UPGRADES.time.inc),
+            damage: 1 + Meta.data.upgrades.damage
+        };
+        
+        // Boss State
+        this.boss = { 
+            active: false, 
+            x: this.width/2, 
+            y: 100,
+            timer: 0, 
+            hp: 100, 
+            maxHp: 100,
+            dir: 1,
+            invulnerable: false
+        };
+        this.bossEventTriggered = false;
+        this.bossProjectiles = [];
+        
+        // Spawn timers
+        this.lastPowerupSpawn = 0;
+
+        UI.showScreen('hud');
+        UI.updateHUD(0, 3);
+        UI.updatePowerups(this.powerups);
+        UI.updateCombo(0);
+        document.getElementById('boss-hp-bar').style.display = 'none';
+        document.getElementById('boss-name').style.display = 'none';
+        document.getElementById('boss-battle-controls').style.display = 'none';
+        document.getElementById('boss-warning-text').classList.remove('anim');
+        document.getElementById('blizzard-overlay').classList.remove('active');
+        document.getElementById('ult-fill').style.height = '0%';
+        document.getElementById('ult-btn').classList.remove('ult-ready');
+
+        requestAnimationFrame(this.loop);
+    }
+
+    handleInputClick(x, y) {
+        // Check if clicked on Ice to break it
+        for (let obj of this.objects) {
+            if (obj.type === 'FROZEN') {
+                const dx = x - obj.x;
+                const dy = y - obj.y;
+                if (dx*dx + dy*dy < 2500) {
+                    obj.type = 'GIFT';
+                    obj.visual = obj.subType;
+                    AudioSys.play('shatter');
+                    this.spawnParticles(obj.x, obj.y, 10, '#a5f3fc');
+                    UI.spawnFloatText("CRACK!", obj.x, obj.y, '#a5f3fc');
+                    this.sessionStats.ice++;
+                    Meta.updateQuest('ice', 1);
+                    return;
+                }
+            }
+        }
+    }
+
+    throwGift() {
+        if (!this.bossBattleMode || this.boss.invulnerable) return;
+        
+        AudioSys.play('throw');
+        
+        // Create projectile
+        this.bossProjectiles.push({
+            x: this.player.x,
+            y: this.height - 80,
+            targetX: this.boss.x,
+            targetY: this.boss.y,
+            speed: 800,
+            visual: '🎁'
+        });
+    }
+
+    activateUlt() {
+        if (!this.running || this.ultCharge < 100) return;
+        AudioSys.play('ult');
+        this.ultCharge = 0;
+        document.getElementById('ult-fill').style.height = '0%';
+        document.getElementById('ult-btn').classList.remove('ult-ready');
+        
+        // Flash effect
+        const flash = document.getElementById('flash-overlay');
+        flash.style.backgroundColor = 'white';
+        flash.style.opacity = 1;
+        setTimeout(() => flash.style.opacity = 0, 200);
+
+        if (this.bossBattleMode) {
+            // Damage boss heavily
+            this.boss.hp -= 30;
+            AudioSys.play('boss_hit');
+            this.spawnParticles(this.boss.x, this.boss.y, 30, '#fbbf24');
+            UI.spawnFloatText("-30 HP!", this.boss.x, this.boss.y, '#f43f5e');
+            
+            if (this.boss.hp <= 0) {
+                this.defeatBoss();
+            } else {
+                this.updateBossHP();
+            }
+        } else {
+            // Clear all objects and collect gifts
+            this.objects.forEach(o => {
+                if (o.type === 'GIFT') {
+                    const scoreAdd = this.powerups.double.active ? 40 : 20;
+                    this.score += scoreAdd;
+                    this.addCombo();
+                    this.spawnParticles(o.x, o.y, 5, '#fbbf24');
+                } else {
+                    this.spawnParticles(o.x, o.y, 10, '#fff');
+                }
+            });
+            this.objects = [];
+        }
+        
+        UI.updateHUD(this.score, this.lives);
+    }
+
+    loop(t) {
+        if (!this.running) return;
+        const dt = (t - this.lastTime) / 1000;
+        this.lastTime = t;
+        this.update(dt);
+        this.draw();
+        requestAnimationFrame(this.loop);
+    }
+
+    update(dt) {
+        this.gameTime += dt;
+        
+        // Update quest progress (time-based)
+        Meta.updateQuest('time', dt);
+        
+        // 1. Update Powerups Timers
+        Object.keys(this.powerups).forEach(key => {
+            if (this.powerups[key].active) {
+                this.powerups[key].timer -= dt;
+                if (this.powerups[key].timer <= 0) {
+                    this.powerups[key].active = false;
+                    UI.updatePowerups(this.powerups);
+                }
+            }
+        });
+        
+        // 2. Combo timeout
+        if (this.combo > 0 && performance.now() - this.lastCatchTime > CONFIG.COMBO_TIMEOUT * 1000) {
+            this.combo = 0;
+            UI.updateCombo(0);
+        }
+        
+        // 3. Player Movement (not in boss battle)
+        if (!this.bossBattleMode) {
+            const speed = this.stats.speed * dt;
+            let dx = 0;
+            if (this.keys.left) { 
+                this.player.x -= speed; 
+                dx = -1; 
+                this.input.active = false; 
+            }
+            else if (this.keys.right) { 
+                this.player.x += speed; 
+                dx = 1; 
+                this.input.active = false; 
+            }
+            else if (this.input.active) {
+                const diff = this.input.x - this.player.x;
+                if (Math.abs(diff) > 5) { 
+                    this.player.x += Math.sign(diff) * Math.min(Math.abs(diff), speed); 
+                    dx = Math.sign(diff); 
+                }
+            }
+            this.player.x = Math.max(30, Math.min(this.width-30, this.player.x));
+            this.player.angle += (dx * 0.3 - this.player.angle) * 10 * dt;
+
+            // Trail effect
+            this.trail.push({x:this.player.x, y:this.height-20, alpha:0.8});
+            if(this.trail.length > 10) this.trail.shift();
+        } else {
+            // Boss battle: player can move left/right at bottom
+            const speed = this.stats.speed * dt * 0.5; // Slower in boss battle
+            let dx = 0;
+            if (this.keys.left) { 
+                this.player.x -= speed; 
+                dx = -1; 
+            }
+            else if (this.keys.right) { 
+                this.player.x += speed; 
+                dx = 1; 
+            }
+            this.player.x = Math.max(30, Math.min(this.width-30, this.player.x));
+            this.player.angle += (dx * 0.3 - this.player.angle) * 10 * dt;
+        }
+
+        // 4. Boss Logic
+        if (!this.bossEventTriggered && this.gameTime > CONFIG.BOSS_TIME) {
+            this.startBossEvent();
+        }
+        
+        if (this.boss.active && !this.bossBattleMode) {
+            // Pre-battle phase: boss moves and shoots
+            this.boss.timer -= dt;
+            this.boss.x += 200 * this.boss.dir * dt;
+            if (this.boss.x < 50 || this.boss.x > this.width - 50) this.boss.dir *= -1;
+
+            if (this.boss.timer <= 0) {
+                this.startBossBattle();
+            }
+        }
+        
+        if (this.bossBattleMode) {
+            // Boss battle phase
+            this.updateBossBattle(dt);
+        }
+
+        // 5. Spawning (not in boss battle)
+        if (!this.bossBattleMode) {
+            this.handleSpawning(dt);
+        }
+
+        // 6. Objects Update
+        const speedMult = this.powerups.slow.active ? 0.5 : 1;
+        for (let i = this.objects.length - 1; i >= 0; i--) {
+            let obj = this.objects[i];
+            obj.y += obj.speed * speedMult * dt;
+            obj.angle += obj.rot * dt;
+
+            // Magnet effect ONLY if magnet powerup is active
+            if (obj.type === 'GIFT' && this.powerups.magnet.active && obj.y > this.height/2) {
+                const magnetRadius = 100 + (this.stats.magnetLevel * 50);
+                const dist = Math.abs(this.player.x - obj.x);
+                if (dist < magnetRadius) {
+                    obj.x += (this.player.x - obj.x) * 5 * dt;
+                }
+            }
+
+            // Miss (fell off screen)
+            if (obj.y > this.height) {
+                this.objects.splice(i, 1);
+                // Reset combo if it was a gift
+                if (obj.type === 'GIFT') {
+                    this.combo = 0;
+                    UI.updateCombo(0);
+                }
+                continue;
+            }
+
+            // Collision Detection
+            if (Math.abs(obj.x - this.player.x) < 40 && Math.abs(obj.y - (this.height - 40)) < 40) {
+                this.handleCollision(obj);
+                this.objects.splice(i, 1);
+            }
+        }
+        
+        // 7. Boss Projectiles Update
+        for (let i = this.bossProjectiles.length - 1; i >= 0; i--) {
+            let proj = this.bossProjectiles[i];
+            const dx = proj.targetX - proj.x;
+            const dy = proj.targetY - proj.y;
+            const dist = Math.sqrt(dx*dx + dy*dy);
+            
+            if (dist < 10) {
+                // Hit boss
+                this.boss.hp -= this.stats.damage;
+                AudioSys.play('boss_hit');
+                this.spawnParticles(proj.targetX, proj.targetY, 10, '#fbbf24');
+                UI.spawnFloatText(`-${this.stats.damage}`, proj.targetX, proj.targetY, '#f43f5e');
+                this.bossProjectiles.splice(i, 1);
+                
+                if (this.boss.hp <= 0) {
+                    this.defeatBoss();
+                } else {
+                    this.updateBossHP();
+                }
+            } else {
+                proj.x += (dx / dist) * proj.speed * dt;
+                proj.y += (dy / dist) * proj.speed * dt;
+            }
+        }
+
+        // 8. Particles
+        this.particles.forEach(p => { 
+            p.x+=p.vx*dt; 
+            p.y+=p.vy*dt; 
+            p.vy+=500*dt; 
+            p.life-=dt; 
+        });
+        this.particles = this.particles.filter(p => p.life > 0);
+        
+        // 9. Ultimate charge display
+        const fill = document.getElementById('ult-fill');
+        if (fill.style.height !== this.ultCharge+'%') {
+            fill.style.height = this.ultCharge + '%';
+            if (this.ultCharge >= 100) {
+                document.getElementById('ult-btn').classList.add('ult-ready');
+            }
+        }
+        
+        // 10. Update UI
+        UI.updatePowerups(this.powerups);
+    }
+
+    startBossEvent() {
+        this.bossEventTriggered = true;
+        this.boss.active = true;
+        this.boss.timer = 10; // 10 seconds before battle
+        AudioSys.play('boss_start');
+        
+        const warning = document.getElementById('boss-warning-text');
+        warning.classList.remove('anim');
+        void warning.offsetWidth;
+        warning.classList.add('anim');
+        
+        document.getElementById('blizzard-overlay').classList.add('active');
+    }
+
+    startBossBattle() {
+        this.bossBattleMode = true;
+        this.objects = []; // Clear all objects
+        
+        this.boss.hp = this.boss.maxHp = 100;
+        this.boss.y = 100;
+        this.boss.invulnerable = false;
+        
+        document.getElementById('boss-hp-bar').style.display = 'block';
+        document.getElementById('boss-name').style.display = 'block';
+        document.getElementById('boss-battle-controls').style.display = 'flex';
+        document.getElementById('blizzard-overlay').classList.add('active');
+        
+        this.updateBossHP();
+    }
+
+    updateBossBattle(dt) {
+        // Boss moves randomly
+        this.boss.x += Math.sin(this.gameTime * 2) * 100 * dt;
+        this.boss.x = Math.max(50, Math.min(this.width - 50, this.boss.x));
+        
+        // Boss shoots projectiles occasionally
+        if (Math.random() < dt * 2) {
+            this.objects.push({
+                x: this.boss.x,
+                y: this.boss.y + 50,
+                type: 'BAD',
+                visual: ASSETS.BOSS_PROJ,
+                speed: 400,
+                angle: 0,
+                rot: 0
+            });
+        }
+    }
+
+    updateBossHP() {
+        const pct = (this.boss.hp / this.boss.maxHp) * 100;
+        document.getElementById('boss-hp-fill').style.width = pct + '%';
+    }
+
+    defeatBoss() {
+        this.bossBattleMode = false;
+        this.boss.active = false;
+        this.boss.invulnerable = true;
+        
+        document.getElementById('boss-hp-bar').style.display = 'none';
+        document.getElementById('boss-name').style.display = 'none';
+        document.getElementById('boss-battle-controls').style.display = 'none';
+        document.getElementById('blizzard-overlay').classList.remove('active');
+        
+        // Rewards
+        UI.spawnFloatText("+500 ПОБЕДА!", this.width/2, 200, '#fbbf24');
+        AudioSys.play('catch');
+        this.score += 500;
+        this.sessionStats.bosses++;
+        Meta.updateQuest('boss', 1);
+        UI.updateHUD(this.score, this.lives);
+        this.spawnParticles(this.width/2, 200, 50, '#fbbf24');
+    }
+
+    handleSpawning(dt) {
+        let spawnRate = this.boss.active ? 0.2 : Math.max(0.4, 0.8 - this.gameTime * 0.005);
+        
+        // SPAWN REGULAR OBJECTS
+        if (Math.random() < dt / spawnRate) {
+            let type, visual, speed = 300, subType = null;
+
+            if (this.boss.active && !this.bossBattleMode) {
+                type = 'BAD';
+                visual = ASSETS.BOSS_PROJ;
+                speed = 500;
+                this.objects.push({ x: this.boss.x, y: this.boss.y + 50, type, visual, speed, angle:0, rot:5 });
+            } else {
+                const r = Math.random() * this.stats.luck;
+                if (r < 0.1) {
+                    type = 'FROZEN';
+                    visual = ASSETS.ICE;
+                    subType = ASSETS.GIFTS[Math.floor(Math.random()*ASSETS.GIFTS.length)];
+                    speed = 350;
+                } else if (r < 0.3) {
+                    type = 'BAD';
+                    visual = ASSETS.BAD[Math.floor(Math.random()*ASSETS.BAD.length)];
+                } else {
+                    type = 'GIFT';
+                    visual = ASSETS.GIFTS[Math.floor(Math.random()*ASSETS.GIFTS.length)];
+                }
+                this.objects.push({ 
+                    x: Math.random() * (this.width - 40) + 20, 
+                    y: -50, type, visual, subType, speed, angle:0, rot: (Math.random()-0.5)*2 
+                });
+            }
+        }
+        
+        // SPAWN POWERUPS (каждые 10-15 секунд)
+        this.lastPowerupSpawn += dt;
+        if (this.lastPowerupSpawn > 10 + Math.random() * 5) {
+            this.lastPowerupSpawn = 0;
+            
+            const powerupTypes = ['shield', 'magnet', 'double', 'slow'];
+            const randomPowerup = powerupTypes[Math.floor(Math.random() * powerupTypes.length)];
+            const powerupData = ASSETS.POWERUPS[randomPowerup];
+            
+            this.objects.push({
+                x: Math.random() * (this.width - 40) + 20,
+                y: -50,
+                type: 'POWERUP',
+                powerupType: randomPowerup,
+                visual: powerupData.icon,
+                speed: 250,
+                angle: 0,
+                rot: 0
+            });
+        }
+    }
+
+    addCombo() {
+        this.combo++;
+        if (this.combo > this.maxCombo) {
+            this.maxCombo = this.combo;
+            Meta.updateQuest('combo', this.combo);
+        }
+        this.lastCatchTime = performance.now();
+        UI.updateCombo(this.combo);
+    }
+
+    handleCollision(obj) {
+        if (obj.type === 'GIFT') {
+            AudioSys.play('catch');
+            
+            let scoreAdd = 10;
+            if (this.powerups.double.active) scoreAdd *= 2;
+            if (this.combo >= 3) scoreAdd *= 1.5;
+            if (this.combo >= 5) scoreAdd *= 2;
+            
+            scoreAdd = Math.floor(scoreAdd);
+            
+            this.score += scoreAdd;
+            this.sessionStats.gifts++;
+            this.addCombo();
+            this.ultCharge = Math.min(100, this.ultCharge + 10);
+            this.spawnParticles(obj.x, obj.y, 5, '#fbbf24');
+            UI.spawnFloatText(`+${scoreAdd}`, obj.x, obj.y - 20, '#fbbf24');
+            
+            Meta.updateQuest('gifts', 1);
+            Meta.updateQuest('score', scoreAdd);
+            
+        } else if (obj.type === 'POWERUP') {
+            AudioSys.play('powerup');
+            const powerupType = obj.powerupType;
+            this.powerups[powerupType].active = true;
+            this.powerups[powerupType].timer = this.stats.powerupTime;
+            
+            const powerupData = ASSETS.POWERUPS[powerupType];
+            this.spawnParticles(obj.x, obj.y, 10, powerupData.color);
+            UI.spawnFloatText(powerupData.name + "!", obj.x, obj.y - 20, powerupData.color);
+            UI.updatePowerups(this.powerups);
+            
+            this.sessionStats.powerups++;
+            Meta.updateQuest('powerups', 1);
+            
+        } else if (obj.type === 'BAD' || obj.type === 'FROZEN') {
+            // Shield protection
+            if (this.powerups.shield.active) {
+                AudioSys.play('shatter');
+                this.powerups.shield.active = false;
+                UI.spawnFloatText("ЗАЩИТА!", obj.x, obj.y, '#3b82f6');
+                this.spawnParticles(obj.x, obj.y, 15, '#3b82f6');
+                UI.updatePowerups(this.powerups);
+            } else {
+                AudioSys.play('hit');
+                this.lives--;
+                this.combo = 0;
+                UI.updateCombo(0);
+                this.triggerFlash('rgba(244, 63, 94, 0.5)');
+                this.screenShake();
+                UI.spawnFloatText(obj.type==='FROZEN'?"ЛЁД!":"ОЙ!", obj.x, obj.y, '#f43f5e');
+                if (this.lives <= 0) this.gameOver();
+            }
+        }
+        UI.updateHUD(this.score, this.lives);
+    }
+
+    spawnParticles(x, y, count, color) {
+        for(let i=0; i<count; i++) {
+            this.particles.push({
+                x, y, 
+                vx:(Math.random()-0.5)*400, 
+                vy:(Math.random()-0.5)*400, 
+                life:0.5, 
+                color
+            });
+        }
+    }
+
+    triggerFlash(color) {
+        const el = document.getElementById('flash-overlay');
+        el.style.backgroundColor = color; 
+        el.style.opacity = 1;
+        setTimeout(() => el.style.opacity = 0, 100);
+    }
+
+    screenShake() {
+        this.canvas.style.transform = `translate(${Math.random()*10-5}px, ${Math.random()*10-5}px)`;
+        setTimeout(() => this.canvas.style.transform = 'none', 200);
+    }
+
+    draw() {
+        this.ctx.clearRect(0, 0, this.width, this.height);
+
+        // Trail
+        this.trail.forEach(t => {
+            t.alpha -= 0.08; 
+            t.y += 2;
+            if(t.alpha>0) { 
+                this.ctx.fillStyle = `rgba(255,255,255,${t.alpha})`; 
+                this.ctx.beginPath(); 
+                this.ctx.arc(t.x, t.y, 3, 0, Math.PI*2); 
+                this.ctx.fill(); 
+            }
+        });
+
+        // Player (with shield glow if active)
+        this.ctx.save();
+        this.ctx.translate(this.player.x, this.height - 20);
+        this.ctx.rotate(this.player.angle);
+        
+        if (this.powerups.shield.active) {
+            this.ctx.strokeStyle = '#3b82f6';
+            this.ctx.lineWidth = 3;
+            this.ctx.shadowBlur = 15;
+            this.ctx.shadowColor = '#3b82f6';
+            this.ctx.beginPath();
+            this.ctx.arc(0, -10, 40, 0, Math.PI * 2);
+            this.ctx.stroke();
+        }
+        
+        this.ctx.font = "60px Arial"; 
+        this.ctx.textAlign = "center"; 
+        this.ctx.textBaseline = "bottom";
+        this.ctx.shadowBlur = 0;
+        this.ctx.fillText(this.player.skin, 0, 0);
+        this.ctx.restore();
+
+        // Boss
+        if (this.boss.active) {
+            this.ctx.font = "80px Arial"; 
+            this.ctx.textAlign = "center";
+            
+            // Boss shake when hit
+            let offsetX = 0, offsetY = 0;
+            if (this.boss.invulnerable) {
+                offsetX = Math.sin(Date.now() * 0.1) * 5;
+                offsetY = Math.sin(Date.now() * 0.15) * 5;
+            }
+            
+            this.ctx.fillText(ASSETS.BOSS, this.boss.x + offsetX, this.boss.y + offsetY);
+        }
+
+        // Objects
+        this.ctx.textAlign = "center"; 
+        this.ctx.textBaseline = "middle";
+        this.objects.forEach(o => {
+            this.ctx.save();
+            this.ctx.translate(o.x, o.y);
+            this.ctx.rotate(o.angle);
+            
+            // Glow for powerups
+            if (o.type === 'POWERUP') {
+                const powerupData = ASSETS.POWERUPS[o.powerupType];
+                this.ctx.shadowBlur = 20;
+                this.ctx.shadowColor = powerupData.color;
+            }
+            
+            this.ctx.font = "40px Arial";
+            this.ctx.fillText(o.visual, 0, 0);
+            this.ctx.restore();
+        });
+        
+        // Boss Projectiles (player throws)
+        this.ctx.shadowBlur = 0;
+        this.bossProjectiles.forEach(p => {
+            this.ctx.font = "30px Arial";
+            this.ctx.fillText(p.visual, p.x, p.y);
+        });
+
+        // Particles
+        this.particles.forEach(p => { 
+            this.ctx.fillStyle=p.color; 
+            this.ctx.globalAlpha=p.life/0.5; 
+            this.ctx.fillRect(p.x, p.y, 4, 4); 
+        });
+        this.ctx.globalAlpha = 1;
+    }
+
+    gameOver() {
+        this.running = false;
+        
+        // Update stats
+        Meta.data.stats.totalGifts += this.sessionStats.gifts;
+        Meta.data.stats.totalBosses += this.sessionStats.bosses;
+        if (this.maxCombo > Meta.data.stats.maxCombo) {
+            Meta.data.stats.maxCombo = this.maxCombo;
+        }
+        
+        // Check completed quests
+        let questRewards = 0;
+        let completedQuestMessages = [];
+        Meta.data.quests.forEach(quest => {
+            if (quest.completed) {
+                const template = QUEST_TEMPLATES.find(t => t.id === quest.id);
+                if (template && !quest.rewardClaimed) {
+                    questRewards += template.reward;
+                    completedQuestMessages.push(`✅ ${template.desc} (+${template.reward} 🟡)`);
+                    quest.rewardClaimed = true;
+                }
+            }
+        });
+        
+        const earned = Math.floor(this.score / 2) + questRewards;
+        Meta.addScore(this.score);
+        Meta.data.wallet += earned;
+        Meta.save();
+        
+        document.getElementById('go-score').innerText = this.score;
+        document.getElementById('go-combo').innerText = 'x' + this.maxCombo;
+        document.getElementById('go-earned').innerText = `+${earned} 🟡`;
+        
+        const questMsg = document.getElementById('quest-complete-msg');
+        if (completedQuestMessages.length > 0) {
+            questMsg.style.display = 'block';
+            questMsg.innerHTML = completedQuestMessages.join('<br>');
+        } else {
+            questMsg.style.display = 'none';
+        }
+        
+        UI.openModal('game-over-modal');
+    }
+}
+
+/* ============================================
+   UI MANAGER
+   ============================================ */
+const UI = {
+    currentTab: 'upgrades',
+    
+    init() { 
+        setInterval(() => this.updateTimer(), 1000); 
+        this.updateMenu();
+        this.renderContent();
+    },
+    
+    updateMenu() {
+        document.getElementById('menu-attempts').innerText = `${Meta.data.attempts}/4`;
+        document.getElementById('menu-wallet').innerText = Math.floor(Meta.data.wallet);
+        document.getElementById('menu-best').innerText = Meta.data.bestScore;
+        document.getElementById('ui-idle-bank').innerText = Math.floor(Meta.data.idleBank);
+        
+        const totalElves = Meta.data.factory.elf + Meta.data.factory.machine;
+        const income = (Meta.data.factory.elf * FACTORY.elf.income) + 
+                       (Meta.data.factory.machine * FACTORY.machine.income);
+        document.getElementById('ui-elves-count').innerText = totalElves;
+        document.getElementById('ui-idle-rate').innerText = income.toFixed(1);
+    },
+    
+    updateHUD(score, lives) {
+        document.getElementById('hud-score').innerText = Math.floor(score);
+        document.getElementById('hud-hearts').innerText = "❤️".repeat(Math.max(0,lives));
+    },
+    
+    updateCombo(combo) {
+        const display = document.getElementById('combo-display');
+        const mult = document.getElementById('combo-mult');
+        
+        if (combo >= 3) {
+            display.classList.add('show');
+            mult.innerText = combo;
+        } else {
+            display.classList.remove('show');
+        }
+    },
+    
+    updatePowerups(powerups) {
+        const container = document.getElementById('powerups-display');
+        container.innerHTML = '';
+        
+        Object.keys(powerups).forEach(key => {
+            if (powerups[key].active) {
+                const data = ASSETS.POWERUPS[key];
+                const div = document.createElement('div');
+                div.className = `powerup-indicator ${key}`;
+                div.innerHTML = `<span>${data.icon}</span><span>${Math.ceil(powerups[key].timer)}s</span>`;
+                container.appendChild(div);
+            }
+        });
+    },
+    
+    updateTimer() {
+        Meta.checkRefill();
+        const diff = Meta.data.nextRefill - Date.now();
+        const el2 = document.getElementById('modal-timer');
+        
+        if (Meta.data.attempts >= 4) return;
+        if (diff > 0) {
+            const t = new Date(diff).toISOString().substr(11, 8);
+            el2.innerText = t;
+        }
+    },
+    
+    switchTab(tab) {
+        this.currentTab = tab;
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        event.target.classList.add('active');
+        this.renderContent();
+    },
+    
+    renderContent() {
+        const grid = document.getElementById('grid-content');
+        grid.innerHTML = '';
+
+        if (this.currentTab === 'upgrades') {
+            Object.keys(UPGRADES).forEach(key => {
+                const u = UPGRADES[key];
+                const lvl = Meta.data.upgrades[key];
+                const cost = Math.floor(u.cost * Math.pow(1.5, lvl));
+                const isMax = lvl >= u.max;
+                const canAfford = Meta.data.wallet >= cost;
+                
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.innerHTML = `
+                    <h3>${u.name} <span class="lvl-badge">LVL ${lvl}/${u.max}</span></h3>
+                    <div class="icon">${u.icon}</div>
+                    <div style="font-size:0.8rem; color:#888">${u.desc}</div>
+                    <button class="btn" ${isMax || !canAfford ? 'disabled' : ''} 
+                        onclick="Meta.buyUpgrade('${key}')">
+                        ${isMax ? 'MAX' : cost + ' 🟡'}
+                    </button>
+                `;
+                grid.appendChild(card);
+            });
+        } else if (this.currentTab === 'skins') {
+            Object.keys(SKINS).forEach(key => {
+                const s = SKINS[key];
+                const owned = Meta.data.skins.includes(key);
+                const equipped = Meta.data.currentSkin === key;
+                const canAfford = Meta.data.wallet >= s.cost;
+                
+                const card = document.createElement('div');
+                card.className = 'card';
+                if(equipped) card.style.borderColor = 'var(--gold)';
+                card.innerHTML = `
+                    <h3>${s.name}</h3>
+                    <div class="icon">${s.icon}</div>
+                    <button class="btn ${equipped ? 'green' : ''}" 
+                        ${!owned && !canAfford ? 'disabled' : ''} 
+                        onclick="Meta.buySkin('${key}')">
+                        ${equipped ? 'ВЫБРАНО' : (owned ? 'ВЫБРАТЬ' : s.cost + ' 🟡')}
+                    </button>
+                `;
+                grid.appendChild(card);
+            });
+        } else if (this.currentTab === 'factory') {
+            Object.keys(FACTORY).forEach(key => {
+                const f = FACTORY[key];
+                const count = Meta.data.factory[key];
+                const cost = Math.floor(f.baseCost * Math.pow(1.2, count));
+                const canAfford = Meta.data.wallet >= cost;
+                
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.innerHTML = `
+                    <h3>${f.name} <span class="lvl-badge">x${count}</span></h3>
+                    <div class="icon">${f.icon}</div>
+                    <div style="font-size:0.8rem; color:#22c55e">+${f.income}/сек</div>
+                    <button class="btn" ${!canAfford ? 'disabled' : ''} 
+                        onclick="Meta.buyFactory('${key}')">
+                        ${cost} 🟡
+                    </button>
+                `;
+                grid.appendChild(card);
+            });
+        }
+        this.updateMenu();
+    },
+    
+    renderQuests() {
+        const list = document.getElementById('quest-list');
+        list.innerHTML = '';
+        
+        Meta.data.quests.forEach(quest => {
+            const template = QUEST_TEMPLATES.find(t => t.id === quest.id);
+            if (!template) return;
+            
+            const progress = Math.min(quest.progress, template.target);
+            const percent = (progress / template.target) * 100;
+            
+            const div = document.createElement('div');
+            div.className = `quest-item ${quest.completed ? 'completed' : ''}`;
+            div.innerHTML = `
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <div style="font-weight: bold;">${template.desc}</div>
+                        <div style="font-size: 0.8rem; color: #888;">
+                            ${progress} / ${template.target}
+                        </div>
+                    </div>
+                    <div style="color: var(--gold); font-weight: bold;">
+                        ${quest.completed ? '✅' : template.reward + ' 🟡'}
+                    </div>
+                </div>
+                <div class="quest-progress-bar">
+                    <div class="quest-progress-fill" style="width: ${percent}%"></div>
+                </div>
+            `;
+            list.appendChild(div);
+        });
+    },
+    
+    spawnFloatText(text, x, y, color) {
+        const el = document.createElement('div');
+        el.className = 'float-text'; 
+        el.innerText = text;
+        el.style.left = x+'px'; 
+        el.style.top = y+'px'; 
+        el.style.color = color||'#fff';
+        document.getElementById('game-container').appendChild(el);
+        setTimeout(()=>el.remove(), 1000);
+    },
+    
+    showScreen(id) {
+        document.querySelectorAll('.ui-layer').forEach(e => {
+            e.classList.add('hidden');
+        });
+        
+        const target = document.getElementById(id+'-screen');
+        if(target) {
+            target.classList.remove('hidden');
+        }
+    },
+    
+    openModal(id) { 
+        this.closeAllModals();
+        if (id === 'quest-modal') {
+            this.renderQuests();
+        }
+        document.getElementById(id).classList.add('open'); 
+    },
+    
+    closeAllModals() { 
+        document.querySelectorAll('.modal').forEach(m => m.classList.remove('open')); 
+    }
+};
+
+/* ============================================
+   GAME CONTROLLER
+   ============================================ */
+const Game = {
+    engine: new GameEngine(),
+    
+    startRequest() {
+        if (Meta.useAttempt()) { 
+            UI.showScreen('hud'); 
+            UI.updateMenu(); 
+            this.engine.start(); 
+        } else { 
+            UI.openModal('no-lives-modal'); 
+        }
+    },
+    
+    returnToMenu() { 
+        UI.closeAllModals(); 
+        UI.showScreen('menu'); 
+        UI.updateMenu(); 
+        UI.renderContent();
+    },
+    
+    activateUlt() { 
+        this.engine.activateUlt(); 
+    },
+    
+    throwGift() {
+        this.engine.throwGift();
+    }
+};
+
+/* ============================================
+   INITIALIZATION
+   ============================================ */
+window.onload = () => { 
+    Meta.init(); 
+    UI.init(); 
+};
+</script>
+</body>
+</html>
