@@ -16,7 +16,7 @@
             --font-main: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
-        * { box-sizing: border-box; touch-action: none; user-select: none; -webkit-user-select: none; }
+        * { box-sizing: border-box; touch-action: pan-y; user-select: none; -webkit-user-select: none; }
         
         body {
             margin: 0; padding: 0;
@@ -25,19 +25,30 @@
             font-family: var(--font-main);
             overflow: hidden;
             height: 100vh;
+            height: 100dvh;
             display: flex; justify-content: center; align-items: center;
+            position: fixed;
+            width: 100%;
         }
 
         #game-container {
             position: relative;
-            width: 100%; max-width: 600px; height: 100%;
+            width: 100%; max-width: 600px; 
+            height: 100vh;
+            height: 100dvh;
             background: linear-gradient(to bottom, #0b1026 0%, #2b32b2 100%);
             overflow: hidden;
             box-shadow: 0 0 20px rgba(0,0,0,0.5);
             cursor: crosshair;
+            touch-action: none;
         }
 
-        canvas { display: block; width: 100%; height: 100%; }
+        canvas { 
+            display: block; 
+            width: 100%; 
+            height: 100%; 
+            touch-action: none;
+        }
 
         /* UI LAYERS */
         .ui-layer {
@@ -113,6 +124,7 @@
             font-size: 0.9rem;
             color: rgba(255,255,255,0.7);
             margin-bottom: 20px;
+            min-height: 40px;
         }
         
         .story-text {
@@ -181,7 +193,9 @@
             text-align: center;
             pointer-events: all;
             overflow-y: auto;
-            padding: 20px 0;
+            overflow-x: hidden;
+            padding: 20px 0 120px 0;
+            -webkit-overflow-scrolling: touch;
         }
         
         .logo { 
@@ -262,7 +276,6 @@
             grid-template-columns: 1fr 1fr; 
             gap: 10px; 
             width: 90%; 
-            padding-bottom: 100px;
             margin-bottom: 20px;
         }
         .card {
@@ -336,11 +349,14 @@
         .play-container {
             position: fixed; 
             bottom: 20px; 
+            left: 50%;
+            transform: translateX(-50%);
             width: 90%; 
             max-width: 560px;
             display: flex; 
             gap: 10px;
             z-index: 50;
+            padding-bottom: env(safe-area-inset-bottom);
         }
         .big-play-btn {
             flex: 2; 
@@ -552,6 +568,8 @@
             box-shadow: 0 0 50px rgba(14, 165, 233, 0.2);
             display: none; 
             z-index: 100;
+            max-height: 80vh;
+            overflow-y: auto;
         }
         .modal.open { display: block; animation: popIn 0.3s; }
         
@@ -612,28 +630,37 @@
         }
         
         .roulette-wheel {
-            width: 200px;
-            height: 200px;
+            width: 250px;
+            height: 250px;
             margin: 20px auto;
             border-radius: 50%;
-            background: conic-gradient(
-                #ef4444 0deg 60deg,
-                #22c55e 60deg 120deg,
-                #3b82f6 120deg 180deg,
-                #fbbf24 180deg 240deg,
-                #a855f7 240deg 300deg,
-                #f59e0b 300deg 360deg
-            );
             position: relative;
             transition: transform 3s cubic-bezier(0.17, 0.67, 0.12, 0.99);
+            border: 5px solid var(--gold);
+            box-shadow: 0 0 20px rgba(251, 191, 36, 0.5);
+        }
+        
+        .roulette-section {
+            position: absolute;
+            width: 50%;
+            height: 50%;
+            transform-origin: 100% 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: white;
+            text-shadow: 0 2px 4px black;
         }
         
         .roulette-pointer {
             position: absolute;
-            top: -20px;
+            top: -30px;
             left: 50%;
             transform: translateX(-50%);
-            font-size: 2rem;
+            font-size: 3rem;
+            z-index: 10;
         }
         
         /* LEADERBOARD */
@@ -731,6 +758,32 @@
             20% { opacity:1; transform: scale(1.2); } 
             80% { opacity:1; transform: scale(1); } 
             100% { opacity:0; transform: scale(1.5); } 
+        }
+
+        /* WIN NOTIFICATION */
+        .win-notification {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+            padding: 30px;
+            border-radius: 20px;
+            font-size: 2rem;
+            font-weight: bold;
+            color: white;
+            z-index: 200;
+            box-shadow: 0 0 50px rgba(34, 197, 94, 0.5);
+            animation: winPop 2s forwards;
+            pointer-events: none;
+        }
+        
+        @keyframes winPop {
+            0% { transform: translate(-50%, -50%) scale(0); }
+            10% { transform: translate(-50%, -50%) scale(1.2); }
+            20% { transform: translate(-50%, -50%) scale(1); }
+            90% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+            100% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
         }
     </style>
 </head>
@@ -839,7 +892,7 @@
             <!-- BOSS INFO -->
             <div class="boss-name" id="boss-name">ГРИНЧ</div>
             <div class="boss-hp-bar" id="boss-hp-bar">
-            <div class="boss-hp-fill" id="boss-hp-fill"></div>
+                <div class="boss-hp-fill" id="boss-hp-fill"></div>
             </div>
             
             <!-- BOSS BATTLE CONTROLS -->
@@ -928,20 +981,39 @@
                 </div>
                 <button class="btn" onclick="MiniGame.spinSlots()">КРУТИТЬ</button>
                 <div style="margin-top: 10px; font-size: 0.8rem; color: #888;">
-                    3 одинаковых = x10 | 2 одинаковых = x3
+                    3 одинаковых = 500🟡 | 2 одинаковых = 100🟡
                 </div>
             </div>
             
             <!-- ROULETTE -->
             <div id="roulette-game" class="minigame-container" style="display: none;">
                 <div class="roulette-pointer">⬇️</div>
-                <div class="roulette-wheel" id="roulette-wheel"></div>
+                <div class="roulette-wheel" id="roulette-wheel">
+                    <div class="roulette-section" style="background: #ef4444; clip-path: polygon(50% 50%, 100% 0, 100% 100%); transform: rotate(0deg);">
+                        <span style="margin-left: 60px;">x0</span>
+                    </div>
+                    <div class="roulette-section" style="background: #22c55e; clip-path: polygon(50% 50%, 100% 0, 100% 100%); transform: rotate(60deg);">
+                        <span style="margin-left: 60px;">x2</span>
+                    </div>
+                    <div class="roulette-section" style="background: #3b82f6; clip-path: polygon(50% 50%, 100% 0, 100% 100%); transform: rotate(120deg);">
+                        <span style="margin-left: 60px;">x3</span>
+                    </div>
+                    <div class="roulette-section" style="background: #fbbf24; clip-path: polygon(50% 50%, 100% 0, 100% 100%); transform: rotate(180deg);">
+                        <span style="margin-left: 60px;">x5</span>
+                    </div>
+                    <div class="roulette-section" style="background: #a855f7; clip-path: polygon(50% 50%, 100% 0, 100% 100%); transform: rotate(240deg);">
+                        <span style="margin-left: 60px;">x10</span>
+                    </div>
+                    <div class="roulette-section" style="background: #ef4444; clip-path: polygon(50% 50%, 100% 0, 100% 100%); transform: rotate(300deg);">
+                        <span style="margin-left: 60px;">x0</span>
+                    </div>
+                </div>
                 <div style="margin: 15px 0; font-size: 0.9rem;">
                     Стоимость: <span style="color: var(--gold)">100 🟡</span>
                 </div>
                 <button class="btn" onclick="MiniGame.spinRoulette()">КРУТИТЬ</button>
                 <div style="margin-top: 10px; font-size: 0.8rem; color: #888;">
-                    Выигрыш: x2 до x10
+                    Выигрыш от x0 до x10
                 </div>
             </div>
             
@@ -1045,6 +1117,12 @@ const AudioSys = {
             gain.gain.setValueAtTime(0.2, t);
             gain.gain.linearRampToValueAtTime(0, t + 0.3);
             osc.start(t); osc.stop(t + 0.3);
+        } else if (type === 'win') {
+            osc.frequency.setValueAtTime(500, t);
+            osc.frequency.linearRampToValueAtTime(1000, t + 0.5);
+            gain.gain.setValueAtTime(0.3, t);
+            gain.gain.linearRampToValueAtTime(0, t + 0.5);
+            osc.start(t); osc.stop(t + 0.5);
         }
     }
 };
@@ -1096,11 +1174,6 @@ const ASSETS = {
         magnet: { icon: "🧲", color: "#f59e0b", name: "МАГНИТ" },
         double: { icon: "✖️2", color: "#22c55e", name: "x2" },
         slow: { icon: "🐌", color: "#a855f7", name: "ЗАМЕДЛЕНИЕ" }
-    },
-    WEATHER: {
-        snow: { name: "Снегопад", icon: "❄️" },
-        blizzard: { name: "Метель", icon: "🌨️" },
-        fireworks: { name: "Салют", icon: "🎆" }
     }
 };
 
@@ -1194,7 +1267,6 @@ const LOADING_TIPS = [
    ============================================ */
 const LoadingSystem = {
     progress: 0,
-    storyIndex: 0,
     
     async start() {
         const isFirstTime = !Meta.data.tutorialCompleted;
@@ -1222,23 +1294,34 @@ const LoadingSystem = {
         for (let text of STORY) {
             storyText.innerText = text;
             await this.simulateProgress(100 / STORY.length);
-            await this.delay(2000);
+            await this.delay(3000); // Увеличено время показа истории
         }
     },
     
     async showTips() {
         const loadingText = document.getElementById('loading-text');
-        const randomTip = LOADING_TIPS[Math.floor(Math.random() * LOADING_TIPS.length)];
-        loadingText.innerText = randomTip;
-        await this.simulateProgress(100);
+        const tips = [...LOADING_TIPS];
+        
+        // Показываем 3 случайные подсказки
+        for (let i = 0; i < 3; i++) {
+            const randomIndex = Math.floor(Math.random() * tips.length);
+            const tip = tips.splice(randomIndex, 1)[0];
+            loadingText.innerText = tip;
+            await this.simulateProgress(33);
+            await this.delay(2000); // Дольше показываем подсказки
+        }
     },
     
-    async simulateProgress(target) {
+    async simulateProgress(targetIncrease) {
         const fill = document.getElementById('loading-fill');
-        while (this.progress < target) {
-            this.progress += 2;
+        const target = this.progress + targetIncrease;
+        const steps = 20;
+        const increment = targetIncrease / steps;
+        
+        for (let i = 0; i < steps; i++) {
+            this.progress += increment;
             fill.style.width = Math.min(this.progress, 100) + '%';
-            await this.delay(50);
+            await this.delay(100); // Плавная анимация
         }
     },
     
@@ -1321,7 +1404,7 @@ const Meta = {
     },
     
     init() {
-        const s = localStorage.getItem('ny_ultimate_v3');
+        const s = localStorage.getItem('ny_ultimate_v4');
         if (s) {
             this.data = JSON.parse(s);
             if (!this.data.quests || this.data.quests.length === 0) {
@@ -1344,7 +1427,7 @@ const Meta = {
     },
     
     save() { 
-        localStorage.setItem('ny_ultimate_v3', JSON.stringify(this.data)); 
+        localStorage.setItem('ny_ultimate_v4', JSON.stringify(this.data)); 
         UI.updateMenu(); 
     },
     
@@ -1595,30 +1678,50 @@ const MiniGame = {
             await this.delay(100);
         }
         
-        const results = [
-            symbols[Math.floor(Math.random() * symbols.length)],
-            symbols[Math.floor(Math.random() * symbols.length)],
-            symbols[Math.floor(Math.random() * symbols.length)]
-        ];
+        // Увеличен шанс проигрыша
+        const luck = Math.random();
+        let results;
+        
+        if (luck < 0.05) { // 5% шанс джекпота
+            const sameSymbol = symbols[Math.floor(Math.random() * symbols.length)];
+            results = [sameSymbol, sameSymbol, sameSymbol];
+        } else if (luck < 0.20) { // 15% шанс выигрыша
+            const sameSymbol = symbols[Math.floor(Math.random() * symbols.length)];
+            const diff = symbols[Math.floor(Math.random() * symbols.length)];
+            results = [sameSymbol, sameSymbol, diff];
+        } else { // 80% проигрыш
+            results = [
+                symbols[Math.floor(Math.random() * symbols.length)],
+                symbols[Math.floor(Math.random() * symbols.length)],
+                symbols[Math.floor(Math.random() * symbols.length)]
+            ];
+            // Убедимся что не совпадают
+            while (results[0] === results[1] || results[1] === results[2] || results[0] === results[2]) {
+                results[2] = symbols[Math.floor(Math.random() * symbols.length)];
+            }
+        }
         
         slots[0].innerText = results[0];
         slots[1].innerText = results[1];
-        slots[2].innerText= results[2];
+        slots[2].innerText = results[2];
         
         let winAmount = 0;
         if (results[0] === results[1] && results[1] === results[2]) {
             winAmount = 500;
-            UI.spawnFloatText("ДЖЕКПОТ! +500 🟡", 300, 400, '#fbbf24');
+            this.showWinNotification("ДЖЕКПОТ! +500 🟡");
+            AudioSys.play('win');
         } else if (results[0] === results[1] || results[1] === results[2] || results[0] === results[2]) {
-            winAmount = 150;
-            UI.spawnFloatText("Выигрыш! +150 🟡", 300, 400, '#22c55e');
+            winAmount = 100;
+            this.showWinNotification("Выигрыш! +100 🟡");
+            AudioSys.play('powerup');
+        } else {
+            this.showWinNotification("Увы! Попробуй ещё раз");
         }
         
         if (winAmount > 0) {
             Meta.data.wallet += winAmount;
             Meta.data.stats.totalCoins += winAmount;
             Meta.save();
-            AudioSys.play('powerup');
         }
         
         this.isSpinning = false;
@@ -1638,30 +1741,63 @@ const MiniGame = {
         AudioSys.play('coin');
         
         const wheel = document.getElementById('roulette-wheel');
-        const multipliers = [2, 3, 5, 2, 10, 2];
-        const randomSector = Math.floor(Math.random() * 6);
-        const degrees = 360 * 5 + (randomSector * 60);
+        
+        // Вероятности: 35% x0, 25% x2, 20% x3, 15% x5, 5% x10
+        const rand = Math.random();
+        let sector;
+        
+        if (rand < 0.35) sector = 0; // x0 (35%)
+        else if (rand < 0.60) sector = 1; // x2 (25%)
+        else if (rand < 0.80) sector = 2; // x3 (20%)
+        else if (rand < 0.95) sector = 3; // x5 (15%)
+        else sector = 4; // x10 (5%)
+        
+        const multipliers = [0, 2, 3, 5, 10, 0];
+        const sectorMapping = [0, 1, 2, 3, 4, 5]; // 6 секторов
+        
+        // Корректируем сектор если попал во второй x0
+        if (sector === 0 && Math.random() < 0.5) {
+            sector = 5;
+        }
+        
+        const degrees = 360 * 5 + (sector * 60) + Math.random() * 40 - 20;
         
         wheel.style.transform = `rotate(${degrees}deg)`;
         
         await this.delay(3000);
         
-        const winMultiplier = multipliers[randomSector];
+        const winMultiplier = multipliers[sector];
         const winAmount = 100 * winMultiplier;
         
-        Meta.data.wallet += winAmount;
-        Meta.data.stats.totalCoins += winAmount;
-        Meta.save();
-        
-        UI.spawnFloatText(`x${winMultiplier}! +${winAmount} 🟡`, 300, 400, '#fbbf24');
-        AudioSys.play('powerup');
+        if (winAmount > 0) {
+            Meta.data.wallet += winAmount;
+            Meta.data.stats.totalCoins += winAmount;
+            Meta.save();
+            this.showWinNotification(`x${winMultiplier}! Выигрыш: +${winAmount} 🟡`);
+            AudioSys.play('win');
+        } else {
+            this.showWinNotification("Увы! Попробуй ещё раз");
+        }
         
         this.isSpinning = false;
     },
     
+    showWinNotification(text) {
+        const notification = document.createElement('div');
+        notification.className = 'win-notification';
+        notification.innerText = text;
+        document.getElementById('game-container').appendChild(notification);
+        
+        setTimeout(() => {
+            notification.remove();
+        }, 2000);
+    },
+    
     openAfterGame() {
         UI.closeAllModals();
-        UI.openModal('minigame-modal');
+        setTimeout(() => {
+            UI.openModal('minigame-modal');
+        }, 100);
     },
     
     delay(ms) {
@@ -1748,21 +1884,51 @@ class GameEngine {
         this.resize();
         window.addEventListener('resize', () => this.resize());
         
-        this.input = { x: 0, active: false };
+        this.input = { x: 0, y: 0, active: false };
         this.keys = { left: false, right: false };
         
-        const inputMove = (x) => { 
+        // ИСПРАВЛЕННАЯ СИСТЕМА УПРАВЛЕНИЯ ДЛЯ МОБИЛЬНЫХ
+        const inputMove = (x, y) => { 
             if(this.running && !this.bossBattleMode) { 
-                this.input.x = Math.max(30, Math.min(this.width-30, x - this.canvas.getBoundingClientRect().left)); 
+                const rect = this.canvas.getBoundingClientRect();
+                this.input.x = Math.max(30, Math.min(this.width-30, x - rect.left)); 
+                this.input.y = y - rect.top;
                 this.input.active = true; 
             }
         };
-        window.addEventListener('mousemove', e => inputMove(e.clientX));
+        
+        const inputEnd = () => {
+            this.input.active = false;
+        };
+        
+        window.addEventListener('mousemove', e => {
+            if (this.input.active) inputMove(e.clientX, e.clientY);
+        });
+        
+        window.addEventListener('mousedown', e => {
+            inputMove(e.clientX, e.clientY);
+        });
+        
+        window.addEventListener('mouseup', inputEnd);
+        
+        this.canvas.addEventListener('touchstart', e => {
+            e.preventDefault();
+            const touch = e.touches[0];
+            inputMove(touch.clientX, touch.clientY);
+        }, {passive:false});
+        
         this.canvas.addEventListener('touchmove', e => { 
-            e.preventDefault(); 
-            inputMove(e.touches[0].clientX); 
+            e.preventDefault();
+            const touch = e.touches[0];
+            inputMove(touch.clientX, touch.clientY);
+        }, {passive:false});
+        
+        this.canvas.addEventListener('touchend', e => {
+            e.preventDefault();
+            inputEnd();
         }, {passive:false});
 
+        // Click for ice breaking
         const inputClick = (cx, cy) => {
             if (!this.running) return;
             const rect = this.canvas.getBoundingClientRect();
@@ -1770,12 +1936,8 @@ class GameEngine {
             const y = cy - rect.top;
             this.handleInputClick(x, y);
         };
-        this.canvas.addEventListener('mousedown', e => inputClick(e.clientX, e.clientY));
-        this.canvas.addEventListener('touchstart', e => {
-            e.preventDefault();
-            inputClick(e.touches[0].clientX, e.touches[0].clientY);
-            inputMove(e.touches[0].clientX);
-        }, {passive:false});
+        
+        this.canvas.addEventListener('click', e => inputClick(e.clientX, e.clientY));
 
         window.addEventListener('keydown', e => { 
             if(e.key==='ArrowLeft'||e.key==='a') this.keys.left=true; 
@@ -1852,7 +2014,6 @@ class GameEngine {
             damage: 1 + Meta.data.upgrades.damage
         };
         
-        // BOSS INITIALIZATION FIX
         this.boss = { 
             active: false, 
             x: this.width/2,
@@ -1862,7 +2023,7 @@ class GameEngine {
             maxHp: 100,
             dir: 1,
             invulnerable: false,
-            phase: 'none' // 'none', 'flying', 'battle'
+            phase: 'none'
         };
         this.bossEventTriggered = false;
         this.bossProjectiles = [];
@@ -2024,27 +2185,28 @@ class GameEngine {
             }
         }
         
-        // Player Movement
+        // Player Movement - ИСПРАВЛЕНО ДЛЯ МОБИЛЬНЫХ
         if (!this.bossBattleMode) {
             const speed = this.stats.speed * dt;
             let dx = 0;
+            
             if (this.keys.left) { 
                 this.player.x -= speed; 
                 dx = -1; 
-                this.input.active = false; 
             }
             else if (this.keys.right) { 
                 this.player.x += speed; 
                 dx = 1; 
-                this.input.active = false; 
             }
             else if (this.input.active) {
+                // Плавное следование за пальцем
                 const diff = this.input.x - this.player.x;
                 if (Math.abs(diff) > 5) { 
-                    this.player.x += Math.sign(diff) * Math.min(Math.abs(diff), speed); 
+                    this.player.x += Math.sign(diff) * Math.min(Math.abs(diff), speed * 1.5); 
                     dx = Math.sign(diff); 
                 }
             }
+            
             this.player.x = Math.max(30, Math.min(this.width-30, this.player.x));
             this.player.angle += (dx * 0.3 - this.player.angle) * 10 * dt;
 
@@ -2053,6 +2215,7 @@ class GameEngine {
         } else {
             const speed = this.stats.speed * dt * 0.5;
             let dx = 0;
+            
             if (this.keys.left) { 
                 this.player.x -= speed; 
                 dx = -1; 
@@ -2061,11 +2224,19 @@ class GameEngine {
                 this.player.x += speed; 
                 dx = 1; 
             }
+            else if (this.input.active) {
+                const diff = this.input.x - this.player.x;
+                if (Math.abs(diff) > 5) { 
+                    this.player.x += Math.sign(diff) * Math.min(Math.abs(diff), speed); 
+                    dx = Math.sign(diff); 
+                }
+            }
+            
             this.player.x = Math.max(30, Math.min(this.width-30, this.player.x));
             this.player.angle += (dx * 0.3 - this.player.angle) * 10 * dt;
         }
 
-        // Boss Logic - FIXED
+        // Boss Logic
         if (!this.bossEventTriggered && this.gameTime > CONFIG.BOSS_TIME) {
             this.startBossEvent();
         }
@@ -2073,13 +2244,11 @@ class GameEngine {
         if (this.boss.active && this.boss.phase === 'flying') {
             this.boss.timer -= dt;
             
-            // Boss movement during flying phase
             this.boss.x += 150 * this.boss.dir * dt;
             if (this.boss.x < 80 || this.boss.x > this.width - 80) {
                 this.boss.dir *= -1;
             }
             
-            // Keep boss at top
             this.boss.y = 80;
 
             if (this.boss.timer <= 0) {
@@ -2176,7 +2345,7 @@ class GameEngine {
         this.bossEventTriggered = true;
         this.boss.active = true;
         this.boss.phase = 'flying';
-        this.boss.timer = 10; // 10 seconds flying phase
+        this.boss.timer = 10;
         this.boss.x = this.width / 2;
         this.boss.y = 80;
         this.boss.dir = 1;
@@ -2211,11 +2380,9 @@ class GameEngine {
     }
 
     updateBossBattle(dt) {
-        // Boss smooth movement
         this.boss.x += Math.sin(this.gameTime * 1.5) * 80 * dt;
         this.boss.x = Math.max(80, Math.min(this.width - 80, this.boss.x));
         
-        // Boss shoots projectiles
         if (Math.random() < dt * 1.5) {
             this.objects.push({
                 x: this.boss.x,
@@ -2360,6 +2527,7 @@ class GameEngine {
             this.spawnParticles(obj.x, obj.y, 10, powerupData.color);
             UI.spawnFloatText(powerupData.name + "!", obj.x, obj.y - 20, powerupData.color);
             UI.updatePowerups(this.powerups);
+            
             this.sessionStats.powerups++;
             Meta.updateQuest('powerups', 1);
             
@@ -2453,7 +2621,7 @@ class GameEngine {
             this.ctx.fillText(PETS.lexi.icon, this.pet.x, this.pet.y);
         }
 
-        // Boss - ALWAYS DRAW IF ACTIVE
+        // Boss
         if (this.boss.active && (this.boss.phase === 'flying' || this.boss.phase === 'battle')) {
             this.ctx.font = "80px Arial"; 
             this.ctx.textAlign = "center";
@@ -2908,4 +3076,3 @@ window.onload = () => {
 </script>
 </body>
 </html>
-
