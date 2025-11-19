@@ -194,7 +194,7 @@
             pointer-events: all;
             overflow-y: auto;
             overflow-x: hidden;
-            padding: 20px 0 150px 0; /* Увеличен нижний padding для кнопок */
+            padding: 20px 0;
             -webkit-overflow-scrolling: touch;
         }
         
@@ -339,17 +339,17 @@
 
         /* PLAY BUTTON CONTAINER - ИСПРАВЛЕНО: FIXED ПОЗИЦИЯ */
         .play-container {
-            position: fixed; 
+            position: sticky; 
             bottom: 0; 
-            left: 50%;
-            transform: translateX(-50%);
+            /*left: 50%;
+            transform: translateX(-50%);*/
             width: 100%; 
             max-width: 600px;
             display: flex; 
             gap: 10px;
             z-index: 100; /* Увеличен z-index */
             padding: 15px;
-            background: linear-gradient(to top, rgba(15, 23, 42, 0.98) 0%, rgba(15, 23, 42, 0.95) 80%, transparent 100%);
+            /*background: linear-gradient(to top, rgba(15, 23, 42, 0.98) 0%, rgba(15, 23, 42, 0.95) 80%, transparent 100%);*/
             padding-bottom: calc(15px + env(safe-area-inset-bottom));
         }
         .big-play-btn {
@@ -3117,3 +3117,4 @@ window.onload = () => {
 </script>
 </body>
 </html>
+
