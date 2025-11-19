@@ -17,8 +17,6 @@
         }
 
         * { box-sizing: border-box; touch-action: none; user-select: none; -webkit-user-select: none; }
-
-	*::-webkit-scrollbar { display: none; width: 0; height: 0; }
         
         body {
             margin: 0; padding: 0;
@@ -59,6 +57,120 @@
         }
 
         .interactive, .btn, .modal, .shop-item, .card { pointer-events: all; }
+
+        /* LOADING SCREEN */
+        #loading-screen {
+            background: linear-gradient(135deg, #1e3a8a 0%, #7c3aed 100%);
+            justify-content: center;
+            align-items: center;
+            pointer-events: all;
+            z-index: 1000;
+        }
+        
+        .loading-content {
+            text-align: center;
+            max-width: 400px;
+            padding: 20px;
+        }
+        
+        .loading-logo {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            animation: bounce 2s infinite;
+        }
+        
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+        
+        .loading-title {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--gold);
+            margin-bottom: 30px;
+            text-shadow: 0 0 20px rgba(251, 191, 36, 0.5);
+        }
+        
+        .loading-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 15px;
+        }
+        
+        .loading-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #fbbf24, #f59e0b);
+            width: 0%;
+            transition: width 0.3s;
+            box-shadow: 0 0 10px var(--gold);
+        }
+        
+        .loading-text {
+            font-size: 0.9rem;
+            color: rgba(255,255,255,0.7);
+            margin-bottom: 20px;
+        }
+        
+        .story-text {
+            font-size: 1rem;
+            line-height: 1.6;
+            color: #fff;
+            text-align: left;
+            background: rgba(0,0,0,0.3);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        /* TUTORIAL SCREEN */
+        #tutorial-screen {
+            background: rgba(0,0,0,0.9);
+            justify-content: center;
+            align-items: center;
+            pointer-events: all;
+            z-index: 999;
+        }
+        
+        .tutorial-box {
+            background: var(--panel-bg);
+            padding: 30px;
+            border-radius: 20px;
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+            border: 3px solid var(--primary);
+        }
+        
+        .tutorial-icon {
+            font-size: 5rem;
+            margin-bottom: 20px;
+        }
+        
+        .tutorial-title {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: var(--gold);
+            margin-bottom: 15px;
+        }
+        
+        .tutorial-desc {
+            font-size: 1rem;
+            line-height: 1.6;
+            margin-bottom: 20px;
+            color: rgba(255,255,255,0.9);
+        }
+        
+        .tutorial-step {
+            font-size: 0.9rem;
+            color: var(--primary);
+            margin-bottom: 20px;
+        }
 
         /* MENU */
         #menu-screen {
@@ -123,17 +235,20 @@
             margin-bottom: 10px; 
             background: rgba(0,0,0,0.3); 
             padding: 5px; 
-            border-radius: 20px; 
+            border-radius: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
         }
         .tab-btn {
             background: none; 
             border: none; 
             color: #888; 
-            padding: 8px 15px;
+            padding: 8px 12px;
             font-weight: bold; 
             border-radius: 15px; 
             transition: 0.2s;
             cursor: pointer;
+            font-size: 0.85rem;
         }
         .tab-btn.active { 
             background: var(--primary); 
@@ -169,6 +284,19 @@
             padding: 2px 6px; 
             border-radius: 4px; 
             color: #aaa; 
+        }
+        
+        .card.locked {
+            opacity: 0.6;
+            border: 2px solid #ef4444;
+        }
+        
+        .card.locked::before {
+            content: '🔒';
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            font-size: 1.5rem;
         }
 
         /* BUTTONS */
@@ -284,6 +412,27 @@
         @keyframes pulse {
             0%, 100% { opacity: 1; }
             50% { opacity: 0.7; }
+        }
+        
+        /* WEATHER EFFECTS */
+        .weather-overlay {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 3;
+        }
+        
+        .snowflake, .firework-particle {
+            position: absolute;
+            color: white;
+            font-size: 20px;
+            animation: fall linear infinite;
+            pointer-events: none;
+        }
+        
+        @keyframes fall {
+            to { transform: translateY(100vh); }
         }
         
         /* BOSS HP BAR */
@@ -407,34 +556,111 @@
         .modal.open { display: block; animation: popIn 0.3s; }
         
         /* QUEST LIST */
-        .quest-list {
+        .quest-list, .achievement-list {
             max-height: 300px;
             overflow-y: auto;
             margin: 15px 0;
         }
-        .quest-item {
+        .quest-item, .achievement-item {
             background: rgba(255,255,255,0.05);
             padding: 12px;
             border-radius: 10px;
             margin-bottom: 10px;
             border-left: 4px solid var(--primary);
+            position: relative;
         }
-        .quest-item.completed {
+        .quest-item.completed, .achievement-item.unlocked {
             border-left-color: var(--green);
             opacity: 0.7;
         }
-        .quest-progress-bar {
+        .quest-progress-bar, .achievement-progress-bar {
             background: #333;
             height: 8px;
             border-radius: 4px;
             overflow: hidden;
             margin-top: 5px;
         }
-        .quest-progress-fill {
+        .quest-progress-fill, .achievement-progress-fill {
             height: 100%;
             background: var(--primary);
             transition: width 0.3s;
         }
+        
+        /* MINI GAME */
+        .minigame-container {
+            width: 100%;
+            margin: 20px 0;
+        }
+        
+        .slot-machine {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin: 20px 0;
+        }
+        
+        .slot {
+            font-size: 4rem;
+            width: 80px;
+            height: 100px;
+            background: rgba(0,0,0,0.5);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid var(--gold);
+        }
+        
+        .roulette-wheel {
+            width: 200px;
+            height: 200px;
+            margin: 20px auto;
+            border-radius: 50%;
+            background: conic-gradient(
+                #ef4444 0deg 60deg,
+                #22c55e 60deg 120deg,
+                #3b82f6 120deg 180deg,
+                #fbbf24 180deg 240deg,
+                #a855f7 240deg 300deg,
+                #f59e0b 300deg 360deg
+            );
+            position: relative;
+            transition: transform 3s cubic-bezier(0.17, 0.67, 0.12, 0.99);
+        }
+        
+        .roulette-pointer {
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 2rem;
+        }
+        
+        /* LEADERBOARD */
+        .leaderboard-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .leaderboard-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 8px;
+            margin-bottom: 5px;
+        }
+        
+        .leaderboard-rank {
+            font-size: 1.5rem;
+            font-weight: bold;
+            width: 40px;
+        }
+        
+        .leaderboard-rank.first { color: #fbbf24; }
+        .leaderboard-rank.second { color: #94a3b8; }
+        .leaderboard-rank.third { color: #cd7f32; }
         
         /* EFFECTS */
         @keyframes float { 
@@ -515,9 +741,38 @@
         <div id="blizzard-overlay"></div>
         <div id="flash-overlay"></div>
         <div id="boss-warning-text" class="boss-warning">👹 ГРИНЧ!</div>
+        <div class="weather-overlay" id="weather-overlay"></div>
+
+        <!-- LOADING SCREEN -->
+        <div id="loading-screen" class="ui-layer">
+            <div class="loading-content">
+                <div class="loading-logo">🎅</div>
+                <div class="loading-title">НОВОГОДНИЙ СБОР</div>
+                
+                <div id="story-container" style="display: none;">
+                    <div class="story-text" id="story-text"></div>
+                </div>
+                
+                <div class="loading-bar">
+                    <div class="loading-fill" id="loading-fill"></div>
+                </div>
+                <div class="loading-text" id="loading-text">Загрузка...</div>
+            </div>
+        </div>
+
+        <!-- TUTORIAL SCREEN -->
+        <div id="tutorial-screen" class="ui-layer hidden">
+            <div class="tutorial-box">
+                <div class="tutorial-icon" id="tutorial-icon">🎁</div>
+                <div class="tutorial-title" id="tutorial-title">Добро пожаловать!</div>
+                <div class="tutorial-desc" id="tutorial-desc">Описание...</div>
+                <div class="tutorial-step" id="tutorial-step">Шаг 1/5</div>
+                <button class="btn" onclick="Tutorial.next()">ДАЛЕЕ</button>
+            </div>
+        </div>
 
         <!-- SCREEN: MENU -->
-        <div id="menu-screen" class="ui-layer">
+        <div id="menu-screen" class="ui-layer hidden">
             <div class="logo">🎅 НОВОГОДНИЙ<br>СБОР</div>
             
             <div class="header-stats">
@@ -544,6 +799,8 @@
                 <button class="tab-btn active" onclick="UI.switchTab('upgrades')">⚡ Навыки</button>
                 <button class="tab-btn" onclick="UI.switchTab('skins')">👕 Скины</button>
                 <button class="tab-btn" onclick="UI.switchTab('factory')">🏭 Завод</button>
+                <button class="tab-btn" onclick="UI.switchTab('pets')">🐕 Питомцы</button>
+                <button class="tab-btn" onclick="UI.switchTab('achievements')">🏆 Достижения</button>
             </div>
 
             <!-- CONTENT GRID -->
@@ -555,7 +812,8 @@
             <div class="play-container interactive">
                 <button class="btn big-play-btn" onclick="Game.startRequest()">ИГРАТЬ</button>
                 <button class="btn btn-small" style="flex:1; background: #334155;" onclick="UI.openModal('quest-modal')">📜</button>
-                <button class="btn btn-small" style="flex:1;" onclick="UI.openModal('daily-modal')">🎁</button>
+                <button class="btn btn-small" style="flex:1;" onclick="UI.openModal('leaderboard-modal')">🏅</button>
+                <button class="btn btn-small" style="flex:1; background: #7c3aed;" onclick="UI.openModal('minigame-modal')">🎰</button>
             </div>
         </div>
 
@@ -581,7 +839,7 @@
             <!-- BOSS INFO -->
             <div class="boss-name" id="boss-name">ГРИНЧ</div>
             <div class="boss-hp-bar" id="boss-hp-bar">
-                <div class="boss-hp-fill" id="boss-hp-fill"></div>
+            <div class="boss-hp-fill" id="boss-hp-fill"></div>
             </div>
             
             <!-- BOSS BATTLE CONTROLS -->
@@ -608,7 +866,11 @@
             <div id="quest-complete-msg" style="display:none; color:var(--green); margin: 10px 0; font-weight:bold;">
                 <!-- JS injected -->
             </div>
+            <div id="achievement-unlock-msg" style="display:none; margin: 10px 0;">
+                <!-- JS injected -->
+            </div>
             <button class="btn" onclick="Game.returnToMenu()">В МЕНЮ</button>
+            <button class="btn btn-small" onclick="MiniGame.openAfterGame()">🎰 СЫГРАТЬ В МИНИ-ИГРУ</button>
         </div>
 
         <!-- MODAL: QUEST -->
@@ -618,6 +880,72 @@
                 <!-- JS injected -->
             </div>
             <button class="btn btn-small" onclick="UI.closeAllModals()">Закрыть</button>
+        </div>
+
+        <!-- MODAL: ACHIEVEMENTS -->
+        <div id="achievements-modal" class="modal interactive">
+            <h2>🏆 Достижения</h2>
+            <div class="achievement-list" id="achievement-list">
+                <!-- JS injected -->
+            </div>
+            <button class="btn btn-small" onclick="UI.closeAllModals()">Закрыть</button>
+        </div>
+
+        <!-- MODAL: LEADERBOARD -->
+        <div id="leaderboard-modal" class="modal interactive">
+            <h2>🏅 Турнирная Таблица</h2>
+            <div style="margin: 15px 0;">
+                <div style="font-size: 0.9rem; color: #888; margin-bottom: 10px;">
+                    Текущий сезон: Зима 2024
+                </div>
+                <div style="font-size: 1.2rem; color: var(--gold); font-weight: bold;">
+                    Ваше место: <span id="your-rank">-</span>
+                </div>
+            </div>
+            <div class="leaderboard-list" id="leaderboard-list">
+                <!-- JS injected -->
+            </div>
+            <button class="btn btn-small" onclick="UI.closeAllModals()">Закрыть</button>
+        </div>
+
+        <!-- MODAL: MINI GAME -->
+        <div id="minigame-modal" class="modal interactive">
+            <h2>🎰 Мини-игра</h2>
+            <div class="tabs interactive" style="justify-content: center; margin-bottom: 20px;">
+                <button class="tab-btn active" onclick="MiniGame.switchGame('slots')">Слоты</button>
+                <button class="tab-btn" onclick="MiniGame.switchGame('roulette')">Рулетка</button>
+            </div>
+            
+            <!-- SLOTS -->
+            <div id="slots-game" class="minigame-container">
+                <div class="slot-machine">
+                    <div class="slot" id="slot1">🎁</div>
+                    <div class="slot" id="slot2">🎁</div>
+                    <div class="slot" id="slot3">🎁</div>
+                </div>
+                <div style="margin: 15px 0; font-size: 0.9rem;">
+                    Стоимость: <span style="color: var(--gold)">50 🟡</span>
+                </div>
+                <button class="btn" onclick="MiniGame.spinSlots()">КРУТИТЬ</button>
+                <div style="margin-top: 10px; font-size: 0.8rem; color: #888;">
+                    3 одинаковых = x10 | 2 одинаковых = x3
+                </div>
+            </div>
+            
+            <!-- ROULETTE -->
+            <div id="roulette-game" class="minigame-container" style="display: none;">
+                <div class="roulette-pointer">⬇️</div>
+                <div class="roulette-wheel" id="roulette-wheel"></div>
+                <div style="margin: 15px 0; font-size: 0.9rem;">
+                    Стоимость: <span style="color: var(--gold)">100 🟡</span>
+                </div>
+                <button class="btn" onclick="MiniGame.spinRoulette()">КРУТИТЬ</button>
+                <div style="margin-top: 10px; font-size: 0.8rem; color: #888;">
+                    Выигрыш: x2 до x10
+                </div>
+            </div>
+            
+            <button class="btn btn-small" style="margin-top: 15px;" onclick="UI.closeAllModals()">Закрыть</button>
         </div>
 
         <!-- MODAL: DAILY BONUS -->
@@ -711,6 +1039,12 @@ const AudioSys = {
             gain.gain.setValueAtTime(0.3, t);
             gain.gain.linearRampToValueAtTime(0, t + 0.2);
             osc.start(t); osc.stop(t + 0.2);
+        } else if (type === 'achievement') {
+            osc.frequency.setValueAtTime(800, t);
+            osc.frequency.linearRampToValueAtTime(1200, t + 0.3);
+            gain.gain.setValueAtTime(0.2, t);
+            gain.gain.linearRampToValueAtTime(0, t + 0.3);
+            osc.start(t); osc.stop(t + 0.3);
         }
     }
 };
@@ -739,6 +1073,18 @@ const FACTORY = {
     machine: { name: "Упаковщик", icon: "⚙️", baseCost: 1000, income: 12 }
 };
 
+const PETS = {
+    lexi: { 
+        id: 'lexi', 
+        name: 'Лекси', 
+        icon: '🐕', 
+        cost: 10000, 
+        maxLevel: 10,
+        baseInterval: 10,
+        desc: 'Автособирает 1 подарок'
+    }
+};
+
 const ASSETS = {
     GIFTS: ["🎁", "🧸", "🍬", "🍊", "🚂"],
     BAD: ["⚫", "💩"],
@@ -750,6 +1096,11 @@ const ASSETS = {
         magnet: { icon: "🧲", color: "#f59e0b", name: "МАГНИТ" },
         double: { icon: "✖️2", color: "#22c55e", name: "x2" },
         slow: { icon: "🐌", color: "#a855f7", name: "ЗАМЕДЛЕНИЕ" }
+    },
+    WEATHER: {
+        snow: { name: "Снегопад", icon: "❄️" },
+        blizzard: { name: "Метель", icon: "🌨️" },
+        fireworks: { name: "Салют", icon: "🎆" }
     }
 };
 
@@ -763,7 +1114,6 @@ const CONFIG = {
     COMBO_TIMEOUT: 2
 };
 
-// QUEST TEMPLATES
 const QUEST_TEMPLATES = [
     { id: 1, desc: "Поймай 50 подарков", target: 50, reward: 300, type: 'gifts' },
     { id: 2, desc: "Набери 500 очков", target: 500, reward: 400, type: 'score' },
@@ -776,6 +1126,161 @@ const QUEST_TEMPLATES = [
     { id: 9, desc: "Набери 1000 очков", target: 1000, reward: 800, type: 'score' },
     { id: 10, desc: "Победи Гринча 3 раза", target: 3, reward: 1000, type: 'boss' }
 ];
+
+const ACHIEVEMENTS = [
+    { id: 'first_game', name: 'Первый шаг', desc: 'Сыграй первую игру', icon: '🎮', reward: 100, check: (stats) => stats.gamesPlayed >= 1 },
+    { id: 'combo_master', name: 'Мастер комбо', desc: 'Набери комбо x10', icon: '🔥', reward: 500, check: (stats) => stats.maxCombo >= 10 },
+    { id: 'boss_slayer', name: 'Убийца боссов', desc: 'Победи 5 боссов', icon: '⚔️', reward: 1000, check: (stats) => stats.totalBosses >= 5 },
+    { id: 'collector', name: 'Коллекционер', desc: 'Поймай 500 подарков', icon: '📦', reward: 800, check: (stats) => stats.totalGifts >= 500 },
+    { id: 'rich', name: 'Богач', desc: 'Накопи 50000 монет', icon: '💰', reward: 2000, check: (stats) => stats.totalCoins >= 50000 },
+    { id: 'survivor', name: 'Выживальщик', desc: 'Проживи 120 секунд', icon: '⏱️', reward: 600, check: (stats) => stats.maxTime >= 120 },
+    { id: 'fashionista', name: 'Модник', desc: 'Купи 3 скина', icon: '👔', reward: 1500, check: (stats) => stats.skinsOwned >= 3 },
+    { id: 'pet_owner', name: 'Хозяин питомца', desc: 'Купи Лекси', icon: '🐕', reward: 3000, check: (stats) => stats.hasPet === true },
+    { id: 'factory_owner', name: 'Промышленник', desc: 'Купи 10 эльфов', icon: '🏭', reward: 1000, check: (stats) => stats.totalWorkers >= 10 },
+    { id: 'perfect_game', name: 'Идеальная игра', desc: 'Закончи игру без урона', icon: '💎', reward: 5000, check: (stats) => stats.noDamageGames >= 1 }
+];
+
+const STORY = [
+    "🎄 Новый Год на носу, и Северный Полюс готовится к празднику!",
+    "🎅 Санта и его эльфы упаковывают подарки для детей всего мира.",
+    "😈 Но злобный Гринч задумал украсть все подарки!",
+    "❄️ Он заморозил подарки в лёд и разбросал их по небу!",
+    "💪 Помоги Санте собрать подарки и победить Гринча!",
+    "🎁 Собирай подарки, улучшай способности и спаси Новый Год!"
+];
+
+const TUTORIAL_STEPS = [
+    {
+        icon: "🎮",
+        title: "Управление",
+        desc: "Перемещай Санту влево-вправо с помощью мыши, касания или стрелок на клавиатуре. Собирай падающие подарки!",
+    },
+    {
+        icon: "🎁",
+        title: "Подарки",
+        desc: "Зелёные подарки дают очки. Избегай чёрных объектов - они отнимают жизни! У тебя 3 жизни ❤️",
+    },
+    {
+        icon: "🧊",
+        title: "Замороженные подарки",
+        desc: "Некоторые подарки заморожены во льду. Кликай по ним, чтобы разбить лёд и получить подарок!",
+    },
+    {
+        icon: "🛡️",
+        title: "Бонусы",
+        desc: "Ловите бонусы: ЩИТ защищает, МАГНИТ притягивает, x2 удваивает очки, ЗАМЕДЛЕНИЕ замедляет объекты!",
+    },
+    {
+        icon: "👹",
+        title: "Битва с Гринчем",
+        desc: "Через 30 секунд появится Гринч! Уворачивайся от снежков, потом кидай в него подарки, чтобы победить!",
+    }
+];
+
+const LOADING_TIPS = [
+    "💡 Используй SPACE для активации супер-способности!",
+    "🧲 Магнит работает только когда ты поймаешь бонус!",
+    "🔥 Собирай подарки подряд для увеличения комбо!",
+    "👹 У Гринча 100 HP - качай урон!",
+    "🐕 Лекси помогает собирать подарки автоматически!",
+    "🏭 Эльфы приносят пассивный доход!",
+    "🎰 Играй в мини-игры для бонусов!",
+    "🏆 Выполняй достижения для наград!",
+    "📜 Следи за квестами - они приносят много монет!"
+];
+
+/* ============================================
+   LOADING & TUTORIAL SYSTEM
+   ============================================ */
+const LoadingSystem = {
+    progress: 0,
+    storyIndex: 0,
+    
+    async start() {
+        const isFirstTime = !Meta.data.tutorialCompleted;
+        
+        if (isFirstTime) {
+            await this.showStory();
+        } else {
+            await this.showTips();
+        }
+        
+        document.getElementById('loading-screen').classList.add('hidden');
+        
+        if (isFirstTime) {
+            Tutorial.start();
+        } else {
+            UI.showScreen('menu');
+        }
+    },
+    
+    async showStory() {
+        const storyContainer = document.getElementById('story-container');
+        const storyText = document.getElementById('story-text');
+        storyContainer.style.display = 'block';
+        
+        for (let text of STORY) {
+            storyText.innerText = text;
+            await this.simulateProgress(100 / STORY.length);
+            await this.delay(2000);
+        }
+    },
+    
+    async showTips() {
+        const loadingText = document.getElementById('loading-text');
+        const randomTip = LOADING_TIPS[Math.floor(Math.random() * LOADING_TIPS.length)];
+        loadingText.innerText = randomTip;
+        await this.simulateProgress(100);
+    },
+    
+    async simulateProgress(target) {
+        const fill = document.getElementById('loading-fill');
+        while (this.progress < target) {
+            this.progress += 2;
+            fill.style.width = Math.min(this.progress, 100) + '%';
+            await this.delay(50);
+        }
+    },
+    
+    delay(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+};
+
+const Tutorial = {
+    currentStep: 0,
+    
+    start() {
+        this.currentStep = 0;
+        this.show();
+    },
+    
+    show() {
+        const step = TUTORIAL_STEPS[this.currentStep];
+        document.getElementById('tutorial-icon').innerText = step.icon;
+        document.getElementById('tutorial-title').innerText = step.title;
+        document.getElementById('tutorial-desc').innerText = step.desc;
+        document.getElementById('tutorial-step').innerText = `Шаг ${this.currentStep + 1}/${TUTORIAL_STEPS.length}`;
+        
+        UI.showScreen('tutorial');
+    },
+    
+    next() {
+        this.currentStep++;
+        if (this.currentStep < TUTORIAL_STEPS.length) {
+            this.show();
+        } else {
+            this.complete();
+        }
+    },
+    
+    complete() {
+        Meta.data.tutorialCompleted = true;
+        Meta.save();
+        document.getElementById('tutorial-screen').classList.add('hidden');
+        UI.showScreen('menu');
+    }
+};
 
 /* ============================================
    META DATA MANAGER
@@ -790,39 +1295,56 @@ const Meta = {
         skins: ['santa'], 
         currentSkin: 'santa', 
         factory: { elf: 0, machine: 0 },
+        pets: {},
         lastIdleCheck: Date.now(),
         idleBank: 0,
         quests: [
             { id: 1, progress: 0, completed: false }
         ],
+        achievements: [],
         questsCompleted: 0,
         stats: {
             totalGifts: 0,
             totalBosses: 0,
-            maxCombo: 0
+            maxCombo: 0,
+            gamesPlayed: 0,
+            totalCoins: 0,
+            maxTime: 0,
+            skinsOwned: 1,
+            hasPet: false,
+            totalWorkers: 0,
+            noDamageGames: 0
         },
+        leaderboard: [],
+        tutorialCompleted: false,
         lastLogin: 0 
     },
     
     init() {
-        const s = localStorage.getItem('ny_ultimate_v1');
+        const s = localStorage.getItem('ny_ultimate_v3');
         if (s) {
             this.data = JSON.parse(s);
-            // Ensure quests array exists
             if (!this.data.quests || this.data.quests.length === 0) {
                 this.data.quests = [{ id: 1, progress: 0, completed: false }];
             }
             if (!this.data.stats) {
-                this.data.stats = { totalGifts: 0, totalBosses: 0, maxCombo: 0 };
+                this.data.stats = { totalGifts: 0, totalBosses: 0, maxCombo: 0, gamesPlayed: 0, totalCoins: 0, maxTime: 0, skinsOwned: 1, hasPet: false, totalWorkers: 0, noDamageGames: 0 };
+            }
+            if (!this.data.achievements) {
+                this.data.achievements = [];
+            }
+            if (!this.data.pets) {
+                this.data.pets = {};
             }
         }
         this.checkRefill();
         this.calcIdle();
         setInterval(() => this.calcIdle(), 1000);
+        this.updateStats();
     },
     
     save() { 
-        localStorage.setItem('ny_ultimate_v1', JSON.stringify(this.data)); 
+        localStorage.setItem('ny_ultimate_v3', JSON.stringify(this.data)); 
         UI.updateMenu(); 
     },
     
@@ -855,16 +1377,20 @@ const Meta = {
         if (this.data.idleBank >= 1) {
             const amount = Math.floor(this.data.idleBank);
             this.data.wallet += amount;
+            this.data.stats.totalCoins += amount;
             this.data.idleBank = 0;
             AudioSys.play('coin');
             this.save();
+            this.checkAchievements();
         }
     },
     
     addScore(s) {
         this.data.wallet += s;
+        this.data.stats.totalCoins += s;
         if (s > this.data.bestScore) this.data.bestScore = s;
         this.save();
+        this.checkAchievements();
     },
     
     buyUpgrade(key) {
@@ -885,8 +1411,10 @@ const Meta = {
         if (this.data.wallet >= cost) {
             this.data.wallet -= cost;
             this.data.factory[key]++;
+            this.updateStats();
             this.save();
             UI.renderContent();
+            this.checkAchievements();
         }
     },
     
@@ -901,9 +1429,38 @@ const Meta = {
             this.data.wallet -= cost;
             this.data.skins.push(id);
             this.data.currentSkin = id;
+            this.updateStats();
             this.save();
             UI.renderContent();
+            this.checkAchievements();
             return true;
+        }
+        return false;
+    },
+    
+    buyPet(id) {
+        const pet = PETS[id];
+        if (this.data.pets[id]) {
+            const currentLevel = this.data.pets[id].level;
+            if (currentLevel >= pet.maxLevel) return false;
+            const upgradeCost = Math.floor(pet.cost * Math.pow(1.5, currentLevel));
+            if (this.data.wallet >= upgradeCost) {
+                this.data.wallet -= upgradeCost;
+                this.data.pets[id].level++;
+                this.save();
+                UI.renderContent();
+                return true;
+            }
+        } else {
+            if (this.data.wallet >= pet.cost) {
+                this.data.wallet -= pet.cost;
+                this.data.pets[id] = { level: 1, lastCollect: Date.now() };
+                this.data.stats.hasPet = true;
+                this.save();
+                UI.renderContent();
+                this.checkAchievements();
+                return true;
+            }
         }
         return false;
     },
@@ -929,10 +1486,10 @@ const Meta = {
                 if (quest.progress >= template.target && !quest.completed) {
                     quest.completed = true;
                     this.data.wallet += template.reward;
+                    this.data.stats.totalCoins += template.reward;
                     this.data.questsCompleted++;
                     anyCompleted = true;
                     
-                    // Add new quest
                     const nextQuestId = quest.id + 1;
                     if (nextQuestId <= QUEST_TEMPLATES.length) {
                         const exists = this.data.quests.find(q => q.id === nextQuestId);
@@ -950,11 +1507,234 @@ const Meta = {
         return anyCompleted;
     },
     
+    checkAchievements() {
+        let newUnlocks = [];
+        ACHIEVEMENTS.forEach(achievement => {
+            if (!this.data.achievements.includes(achievement.id)) {
+                if (achievement.check(this.data.stats)) {
+                    this.data.achievements.push(achievement.id);
+                    this.data.wallet += achievement.reward;
+                    this.data.stats.totalCoins += achievement.reward;
+                    newUnlocks.push(achievement);
+                    AudioSys.play('achievement');
+                }
+            }
+        });
+        
+        if (newUnlocks.length > 0) {
+            this.save();
+        }
+        
+        return newUnlocks;
+    },
+    
+    updateStats() {
+        this.data.stats.skinsOwned = this.data.skins.length;
+        this.data.stats.totalWorkers = (this.data.factory.elf || 0) + (this.data.factory.machine || 0);
+        this.data.stats.hasPet = Object.keys(this.data.pets).length > 0;
+    },
+    
+    updateLeaderboard(score) {
+        const playerName = "Игрок";
+        this.data.leaderboard.push({ name: playerName, score, date: Date.now() });
+        this.data.leaderboard.sort((a, b) => b.score - a.score);
+        this.data.leaderboard = this.data.leaderboard.slice(0, 100);
+        this.save();
+    },
+    
     claimDaily() { 
         this.data.wallet += 200; 
+        this.data.stats.totalCoins += 200;
         this.save(); 
         UI.closeAllModals(); 
-        alert('Получено 200 🟡'); 
+        alert('Получено 200 🟡');
+        this.checkAchievements();
+    }
+};
+
+/* ============================================
+   MINI GAMES
+   ============================================ */
+const MiniGame = {
+    currentGame: 'slots',
+    isSpinning: false,
+    
+    switchGame(game) {
+        this.currentGame = game;
+        document.getElementById('slots-game').style.display = game === 'slots' ? 'block' : 'none';
+        document.getElementById('roulette-game').style.display = game === 'roulette' ? 'block' : 'none';
+        
+        document.querySelectorAll('#minigame-modal .tab-btn').forEach(btn => btn.classList.remove('active'));
+        event.target.classList.add('active');
+    },
+    
+    async spinSlots() {
+        if (this.isSpinning) return;
+        if (Meta.data.wallet < 50) {
+            alert('Недостаточно монет!');
+            return;
+        }
+        
+        this.isSpinning = true;
+        Meta.data.wallet -= 50;
+        Meta.save();
+        
+        AudioSys.play('coin');
+        
+        const symbols = ['🎁', '🧸', '🍬', '⭐', '💎'];
+        const slots = [
+            document.getElementById('slot1'),
+            document.getElementById('slot2'),
+            document.getElementById('slot3')
+        ];
+        
+        for (let i = 0; i < 20; i++) {
+            slots.forEach(slot => {
+                slot.innerText = symbols[Math.floor(Math.random() * symbols.length)];
+            });
+            await this.delay(100);
+        }
+        
+        const results = [
+            symbols[Math.floor(Math.random() * symbols.length)],
+            symbols[Math.floor(Math.random() * symbols.length)],
+            symbols[Math.floor(Math.random() * symbols.length)]
+        ];
+        
+        slots[0].innerText = results[0];
+        slots[1].innerText = results[1];
+        slots[2].innerText= results[2];
+        
+        let winAmount = 0;
+        if (results[0] === results[1] && results[1] === results[2]) {
+            winAmount = 500;
+            UI.spawnFloatText("ДЖЕКПОТ! +500 🟡", 300, 400, '#fbbf24');
+        } else if (results[0] === results[1] || results[1] === results[2] || results[0] === results[2]) {
+            winAmount = 150;
+            UI.spawnFloatText("Выигрыш! +150 🟡", 300, 400, '#22c55e');
+        }
+        
+        if (winAmount > 0) {
+            Meta.data.wallet += winAmount;
+            Meta.data.stats.totalCoins += winAmount;
+            Meta.save();
+            AudioSys.play('powerup');
+        }
+        
+        this.isSpinning = false;
+    },
+    
+    async spinRoulette() {
+        if (this.isSpinning) return;
+        if (Meta.data.wallet < 100) {
+            alert('Недостаточно монет!');
+            return;
+        }
+        
+        this.isSpinning = true;
+        Meta.data.wallet -= 100;
+        Meta.save();
+        
+        AudioSys.play('coin');
+        
+        const wheel = document.getElementById('roulette-wheel');
+        const multipliers = [2, 3, 5, 2, 10, 2];
+        const randomSector = Math.floor(Math.random() * 6);
+        const degrees = 360 * 5 + (randomSector * 60);
+        
+        wheel.style.transform = `rotate(${degrees}deg)`;
+        
+        await this.delay(3000);
+        
+        const winMultiplier = multipliers[randomSector];
+        const winAmount = 100 * winMultiplier;
+        
+        Meta.data.wallet += winAmount;
+        Meta.data.stats.totalCoins += winAmount;
+        Meta.save();
+        
+        UI.spawnFloatText(`x${winMultiplier}! +${winAmount} 🟡`, 300, 400, '#fbbf24');
+        AudioSys.play('powerup');
+        
+        this.isSpinning = false;
+    },
+    
+    openAfterGame() {
+        UI.closeAllModals();
+        UI.openModal('minigame-modal');
+    },
+    
+    delay(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+};
+
+/* ============================================
+   WEATHER SYSTEM
+   ============================================ */
+const Weather = {
+    current: null,
+    particles: [],
+    intervalId: null,
+    
+    start(type) {
+        this.stop();
+        this.current = type;
+        
+        if (type === 'snow' || type === 'blizzard') {
+            this.createSnow(type === 'blizzard' ? 50 : 20);
+        } else if (type === 'fireworks') {
+            this.createFireworks();
+        }
+    },
+    
+    stop() {
+        const container = document.getElementById('weather-overlay');
+        container.innerHTML = '';
+        this.particles = [];
+        this.current = null;
+        if (this.intervalId) {
+            clearInterval(this.intervalId);
+            this.intervalId = null;
+        }
+    },
+    
+    createSnow(count) {
+        const container = document.getElementById('weather-overlay');
+        for (let i = 0; i < count; i++) {
+            const snowflake = document.createElement('div');
+            snowflake.className = 'snowflake';
+            snowflake.innerText = '❄️';
+            snowflake.style.left = Math.random() * 100 + '%';
+            snowflake.style.animationDuration = (Math.random() * 3 + 2) + 's';
+            snowflake.style.animationDelay = Math.random() * 2 + 's';
+            snowflake.style.fontSize = (Math.random() * 10 + 10) + 'px';
+            container.appendChild(snowflake);
+        }
+    },
+    
+    createFireworks() {
+        const container = document.getElementById('weather-overlay');
+        this.intervalId = setInterval(() => {
+            if (this.current !== 'fireworks') return;
+            
+            const firework = document.createElement('div');
+            firework.innerText = '🎆';
+            firework.style.position = 'absolute';
+            firework.style.left = Math.random() * 100 + '%';
+            firework.style.top = Math.random() * 50 + '%';
+            firework.style.fontSize = '3rem';
+            firework.style.animation = 'floatUp 2s forwards';
+            container.appendChild(firework);
+            
+            setTimeout(() => firework.remove(), 2000);
+        }, 1000);
+    },
+    
+    randomWeather() {
+        const types = ['snow', 'blizzard', 'fireworks'];
+        const random = types[Math.floor(Math.random() * types.length)];
+        this.start(random);
     }
 };
 
@@ -968,11 +1748,9 @@ class GameEngine {
         this.resize();
         window.addEventListener('resize', () => this.resize());
         
-        // Input
         this.input = { x: 0, active: false };
         this.keys = { left: false, right: false };
         
-        // Movement Handlers
         const inputMove = (x) => { 
             if(this.running && !this.bossBattleMode) { 
                 this.input.x = Math.max(30, Math.min(this.width-30, x - this.canvas.getBoundingClientRect().left)); 
@@ -985,7 +1763,6 @@ class GameEngine {
             inputMove(e.touches[0].clientX); 
         }, {passive:false});
 
-        // Click/Tap Handlers
         const inputClick = (cx, cy) => {
             if (!this.running) return;
             const rect = this.canvas.getBoundingClientRect();
@@ -1000,7 +1777,6 @@ class GameEngine {
             inputMove(e.touches[0].clientX);
         }, {passive:false});
 
-        // Keyboard
         window.addEventListener('keydown', e => { 
             if(e.key==='ArrowLeft'||e.key==='a') this.keys.left=true; 
             if(e.key==='ArrowRight'||e.key==='d') this.keys.right=true; 
@@ -1012,6 +1788,7 @@ class GameEngine {
         });
 
         this.player = { x: 0, angle: 0, skin: '🎅' };
+        this.pet = null;
         this.running = false;
         this.bossBattleMode = false;
         this.loop = this.loop.bind(this);
@@ -1035,13 +1812,12 @@ class GameEngine {
         this.ultCharge = 0;
         this.lastTime = performance.now();
         this.bossBattleMode = false;
+        this.damageTaken = 0;
         
-        // Combo system
         this.combo = 0;
         this.maxCombo = 0;
         this.lastCatchTime = 0;
         
-        // Session stats
         this.sessionStats = {
             gifts: 0,
             powerups: 0,
@@ -1052,7 +1828,15 @@ class GameEngine {
         this.player.x = this.width/2;
         this.player.skin = SKINS[Meta.data.currentSkin].icon;
         
-        // POWERUPS STATE
+        if (Meta.data.pets.lexi) {
+            this.pet = {
+                x: this.player.x - 50,
+                y: this.height - 20,
+                lastCollect: Date.now(),
+                interval: PETS.lexi.baseInterval - (Meta.data.pets.lexi.level * 0.5)
+            };
+        }
+        
         this.powerups = {
             shield: { active: false, timer: 0 },
             magnet: { active: false, timer: 0 },
@@ -1060,7 +1844,6 @@ class GameEngine {
             slow: { active: false, timer: 0 }
         };
         
-        // Stats from upgrades
         this.stats = {
             speed: UPGRADES.speed.base + (Meta.data.upgrades.speed * UPGRADES.speed.inc),
             magnetLevel: Meta.data.upgrades.magnet,
@@ -1069,22 +1852,26 @@ class GameEngine {
             damage: 1 + Meta.data.upgrades.damage
         };
         
-        // Boss State
+        // BOSS INITIALIZATION FIX
         this.boss = { 
             active: false, 
-            x: this.width/2, 
-            y: 100,
+            x: this.width/2,
+            y: 80,
             timer: 0, 
             hp: 100, 
             maxHp: 100,
             dir: 1,
-            invulnerable: false
+            invulnerable: false,
+            phase: 'none' // 'none', 'flying', 'battle'
         };
         this.bossEventTriggered = false;
         this.bossProjectiles = [];
         
-        // Spawn timers
         this.lastPowerupSpawn = 0;
+        
+        if (Math.random() < 0.3) {
+            Weather.randomWeather();
+        }
 
         UI.showScreen('hud');
         UI.updateHUD(0, 3);
@@ -1102,7 +1889,6 @@ class GameEngine {
     }
 
     handleInputClick(x, y) {
-        // Check if clicked on Ice to break it
         for (let obj of this.objects) {
             if (obj.type === 'FROZEN') {
                 const dx = x - obj.x;
@@ -1126,7 +1912,6 @@ class GameEngine {
         
         AudioSys.play('throw');
         
-        // Create projectile
         this.bossProjectiles.push({
             x: this.player.x,
             y: this.height - 80,
@@ -1144,14 +1929,12 @@ class GameEngine {
         document.getElementById('ult-fill').style.height = '0%';
         document.getElementById('ult-btn').classList.remove('ult-ready');
         
-        // Flash effect
         const flash = document.getElementById('flash-overlay');
         flash.style.backgroundColor = 'white';
         flash.style.opacity = 1;
         setTimeout(() => flash.style.opacity = 0, 200);
 
         if (this.bossBattleMode) {
-            // Damage boss heavily
             this.boss.hp -= 30;
             AudioSys.play('boss_hit');
             this.spawnParticles(this.boss.x, this.boss.y, 30, '#fbbf24');
@@ -1163,7 +1946,6 @@ class GameEngine {
                 this.updateBossHP();
             }
         } else {
-            // Clear all objects and collect gifts
             this.objects.forEach(o => {
                 if (o.type === 'GIFT') {
                     const scoreAdd = this.powerups.double.active ? 40 : 20;
@@ -1192,10 +1974,8 @@ class GameEngine {
     update(dt) {
         this.gameTime += dt;
         
-        // Update quest progress (time-based)
         Meta.updateQuest('time', dt);
         
-        // 1. Update Powerups Timers
         Object.keys(this.powerups).forEach(key => {
             if (this.powerups[key].active) {
                 this.powerups[key].timer -= dt;
@@ -1206,13 +1986,45 @@ class GameEngine {
             }
         });
         
-        // 2. Combo timeout
         if (this.combo > 0 && performance.now() - this.lastCatchTime > CONFIG.COMBO_TIMEOUT * 1000) {
             this.combo = 0;
             UI.updateCombo(0);
         }
         
-        // 3. Player Movement (not in boss battle)
+        // Pet logic
+        if (this.pet && !this.bossBattleMode) {
+            const now = Date.now();
+            if (now - this.pet.lastCollect > this.pet.interval * 1000) {
+                let nearestGift = null;
+                let minDist = Infinity;
+                
+                this.objects.forEach(obj => {
+                    if (obj.type === 'GIFT') {
+                        const dist = Math.hypot(obj.x - this.pet.x, obj.y - this.pet.y);
+                        if (dist < minDist) {
+                            minDist = dist;
+                            nearestGift = obj;
+                        }
+                    }
+                });
+                
+                if (nearestGift && minDist < 200) {
+                    this.score += 5;
+                    this.sessionStats.gifts++;
+                    Meta.updateQuest('gifts', 1);
+                    Meta.updateQuest('score', 5);
+                    this.spawnParticles(nearestGift.x, nearestGift.y, 3, '#fbbf24');
+                    UI.spawnFloatText("+5 🐕", nearestGift.x, nearestGift.y - 20, '#fbbf24');
+                    this.objects = this.objects.filter(o => o !== nearestGift);
+                    AudioSys.play('catch');
+                    this.pet.lastCollect = now;
+                }
+                
+                this.pet.x += (this.player.x - 50 - this.pet.x) * 3 * dt;
+            }
+        }
+        
+        // Player Movement
         if (!this.bossBattleMode) {
             const speed = this.stats.speed * dt;
             let dx = 0;
@@ -1236,12 +2048,10 @@ class GameEngine {
             this.player.x = Math.max(30, Math.min(this.width-30, this.player.x));
             this.player.angle += (dx * 0.3 - this.player.angle) * 10 * dt;
 
-            // Trail effect
             this.trail.push({x:this.player.x, y:this.height-20, alpha:0.8});
             if(this.trail.length > 10) this.trail.shift();
         } else {
-            // Boss battle: player can move left/right at bottom
-            const speed = this.stats.speed * dt * 0.5; // Slower in boss battle
+            const speed = this.stats.speed * dt * 0.5;
             let dx = 0;
             if (this.keys.left) { 
                 this.player.x -= speed; 
@@ -1255,40 +2065,44 @@ class GameEngine {
             this.player.angle += (dx * 0.3 - this.player.angle) * 10 * dt;
         }
 
-        // 4. Boss Logic
+        // Boss Logic - FIXED
         if (!this.bossEventTriggered && this.gameTime > CONFIG.BOSS_TIME) {
             this.startBossEvent();
         }
         
-        if (this.boss.active && !this.bossBattleMode) {
-            // Pre-battle phase: boss moves and shoots
+        if (this.boss.active && this.boss.phase === 'flying') {
             this.boss.timer -= dt;
-            this.boss.x += 200 * this.boss.dir * dt;
-            if (this.boss.x < 50 || this.boss.x > this.width - 50) this.boss.dir *= -1;
+            
+            // Boss movement during flying phase
+            this.boss.x += 150 * this.boss.dir * dt;
+            if (this.boss.x < 80 || this.boss.x > this.width - 80) {
+                this.boss.dir *= -1;
+            }
+            
+            // Keep boss at top
+            this.boss.y = 80;
 
             if (this.boss.timer <= 0) {
                 this.startBossBattle();
             }
         }
         
-        if (this.bossBattleMode) {
-            // Boss battle phase
+        if (this.bossBattleMode && this.boss.phase === 'battle') {
             this.updateBossBattle(dt);
         }
 
-        // 5. Spawning (not in boss battle)
+        // Spawning
         if (!this.bossBattleMode) {
             this.handleSpawning(dt);
         }
 
-        // 6. Objects Update
+        // Objects Update
         const speedMult = this.powerups.slow.active ? 0.5 : 1;
         for (let i = this.objects.length - 1; i >= 0; i--) {
             let obj = this.objects[i];
             obj.y += obj.speed * speedMult * dt;
             obj.angle += obj.rot * dt;
 
-            // Magnet effect ONLY if magnet powerup is active
             if (obj.type === 'GIFT' && this.powerups.magnet.active && obj.y > this.height/2) {
                 const magnetRadius = 100 + (this.stats.magnetLevel * 50);
                 const dist = Math.abs(this.player.x - obj.x);
@@ -1297,10 +2111,8 @@ class GameEngine {
                 }
             }
 
-            // Miss (fell off screen)
             if (obj.y > this.height) {
                 this.objects.splice(i, 1);
-                // Reset combo if it was a gift
                 if (obj.type === 'GIFT') {
                     this.combo = 0;
                     UI.updateCombo(0);
@@ -1308,14 +2120,13 @@ class GameEngine {
                 continue;
             }
 
-            // Collision Detection
             if (Math.abs(obj.x - this.player.x) < 40 && Math.abs(obj.y - (this.height - 40)) < 40) {
                 this.handleCollision(obj);
                 this.objects.splice(i, 1);
             }
         }
         
-        // 7. Boss Projectiles Update
+        // Boss Projectiles Update
         for (let i = this.bossProjectiles.length - 1; i >= 0; i--) {
             let proj = this.bossProjectiles[i];
             const dx = proj.targetX - proj.x;
@@ -1323,7 +2134,6 @@ class GameEngine {
             const dist = Math.sqrt(dx*dx + dy*dy);
             
             if (dist < 10) {
-                // Hit boss
                 this.boss.hp -= this.stats.damage;
                 AudioSys.play('boss_hit');
                 this.spawnParticles(proj.targetX, proj.targetY, 10, '#fbbf24');
@@ -1341,7 +2151,7 @@ class GameEngine {
             }
         }
 
-        // 8. Particles
+        // Particles
         this.particles.forEach(p => { 
             p.x+=p.vx*dt; 
             p.y+=p.vy*dt; 
@@ -1350,7 +2160,7 @@ class GameEngine {
         });
         this.particles = this.particles.filter(p => p.life > 0);
         
-        // 9. Ultimate charge display
+        // Ultimate charge display
         const fill = document.getElementById('ult-fill');
         if (fill.style.height !== this.ultCharge+'%') {
             fill.style.height = this.ultCharge + '%';
@@ -1359,14 +2169,18 @@ class GameEngine {
             }
         }
         
-        // 10. Update UI
         UI.updatePowerups(this.powerups);
     }
 
     startBossEvent() {
         this.bossEventTriggered = true;
         this.boss.active = true;
-        this.boss.timer = 10; // 10 seconds before battle
+        this.boss.phase = 'flying';
+        this.boss.timer = 10; // 10 seconds flying phase
+        this.boss.x = this.width / 2;
+        this.boss.y = 80;
+        this.boss.dir = 1;
+        
         AudioSys.play('boss_start');
         
         const warning = document.getElementById('boss-warning-text');
@@ -1375,14 +2189,17 @@ class GameEngine {
         warning.classList.add('anim');
         
         document.getElementById('blizzard-overlay').classList.add('active');
+        Weather.start('blizzard');
     }
 
     startBossBattle() {
         this.bossBattleMode = true;
-        this.objects = []; // Clear all objects
+        this.boss.phase = 'battle';
+        this.objects = [];
         
         this.boss.hp = this.boss.maxHp = 100;
         this.boss.y = 100;
+        this.boss.x = this.width / 2;
         this.boss.invulnerable = false;
         
         document.getElementById('boss-hp-bar').style.display = 'block';
@@ -1394,18 +2211,18 @@ class GameEngine {
     }
 
     updateBossBattle(dt) {
-        // Boss moves randomly
-        this.boss.x += Math.sin(this.gameTime * 2) * 100 * dt;
-        this.boss.x = Math.max(50, Math.min(this.width - 50, this.boss.x));
+        // Boss smooth movement
+        this.boss.x += Math.sin(this.gameTime * 1.5) * 80 * dt;
+        this.boss.x = Math.max(80, Math.min(this.width - 80, this.boss.x));
         
-        // Boss shoots projectiles occasionally
-        if (Math.random() < dt * 2) {
+        // Boss shoots projectiles
+        if (Math.random() < dt * 1.5) {
             this.objects.push({
                 x: this.boss.x,
-                y: this.boss.y + 50,
+                y: this.boss.y + 40,
                 type: 'BAD',
                 visual: ASSETS.BOSS_PROJ,
-                speed: 400,
+                speed: 350,
                 angle: 0,
                 rot: 0
             });
@@ -1420,14 +2237,15 @@ class GameEngine {
     defeatBoss() {
         this.bossBattleMode = false;
         this.boss.active = false;
+        this.boss.phase = 'none';
         this.boss.invulnerable = true;
         
         document.getElementById('boss-hp-bar').style.display = 'none';
         document.getElementById('boss-name').style.display = 'none';
         document.getElementById('boss-battle-controls').style.display = 'none';
         document.getElementById('blizzard-overlay').classList.remove('active');
+        Weather.stop();
         
-        // Rewards
         UI.spawnFloatText("+500 ПОБЕДА!", this.width/2, 200, '#fbbf24');
         AudioSys.play('catch');
         this.score += 500;
@@ -1435,20 +2253,30 @@ class GameEngine {
         Meta.updateQuest('boss', 1);
         UI.updateHUD(this.score, this.lives);
         this.spawnParticles(this.width/2, 200, 50, '#fbbf24');
+        
+        Weather.start('fireworks');
+        setTimeout(() => Weather.stop(), 5000);
     }
 
     handleSpawning(dt) {
-        let spawnRate = this.boss.active ? 0.2 : Math.max(0.4, 0.8 - this.gameTime * 0.005);
+        let spawnRate = (this.boss.active && this.boss.phase === 'flying') ? 0.3 : Math.max(0.4, 0.8 - this.gameTime * 0.005);
         
-        // SPAWN REGULAR OBJECTS
         if (Math.random() < dt / spawnRate) {
             let type, visual, speed = 300, subType = null;
 
-            if (this.boss.active && !this.bossBattleMode) {
+            if (this.boss.active && this.boss.phase === 'flying') {
                 type = 'BAD';
                 visual = ASSETS.BOSS_PROJ;
-                speed = 500;
-                this.objects.push({ x: this.boss.x, y: this.boss.y + 50, type, visual, speed, angle:0, rot:5 });
+                speed = 450;
+                this.objects.push({ 
+                    x: this.boss.x, 
+                    y: this.boss.y + 40, 
+                    type, 
+                    visual, 
+                    speed, 
+                    angle:0, 
+                    rot:5 
+                });
             } else {
                 const r = Math.random() * this.stats.luck;
                 if (r < 0.1) {
@@ -1470,7 +2298,6 @@ class GameEngine {
             }
         }
         
-        // SPAWN POWERUPS (каждые 10-15 секунд)
         this.lastPowerupSpawn += dt;
         if (this.lastPowerupSpawn > 10 + Math.random() * 5) {
             this.lastPowerupSpawn = 0;
@@ -1533,12 +2360,10 @@ class GameEngine {
             this.spawnParticles(obj.x, obj.y, 10, powerupData.color);
             UI.spawnFloatText(powerupData.name + "!", obj.x, obj.y - 20, powerupData.color);
             UI.updatePowerups(this.powerups);
-            
             this.sessionStats.powerups++;
             Meta.updateQuest('powerups', 1);
             
         } else if (obj.type === 'BAD' || obj.type === 'FROZEN') {
-            // Shield protection
             if (this.powerups.shield.active) {
                 AudioSys.play('shatter');
                 this.powerups.shield.active = false;
@@ -1548,6 +2373,7 @@ class GameEngine {
             } else {
                 AudioSys.play('hit');
                 this.lives--;
+                this.damageTaken++;
                 this.combo = 0;
                 UI.updateCombo(0);
                 this.triggerFlash('rgba(244, 63, 94, 0.5)');
@@ -1598,7 +2424,7 @@ class GameEngine {
             }
         });
 
-        // Player (with shield glow if active)
+        // Player
         this.ctx.save();
         this.ctx.translate(this.player.x, this.height - 20);
         this.ctx.rotate(this.player.angle);
@@ -1619,17 +2445,23 @@ class GameEngine {
         this.ctx.shadowBlur = 0;
         this.ctx.fillText(this.player.skin, 0, 0);
         this.ctx.restore();
+        
+        // Pet
+        if (this.pet) {
+            this.ctx.font = "40px Arial";
+            this.ctx.textAlign = "center";
+            this.ctx.fillText(PETS.lexi.icon, this.pet.x, this.pet.y);
+        }
 
-        // Boss
-        if (this.boss.active) {
+        // Boss - ALWAYS DRAW IF ACTIVE
+        if (this.boss.active && (this.boss.phase === 'flying' || this.boss.phase === 'battle')) {
             this.ctx.font = "80px Arial"; 
             this.ctx.textAlign = "center";
             
-            // Boss shake when hit
             let offsetX = 0, offsetY = 0;
-            if (this.boss.invulnerable) {
-                offsetX = Math.sin(Date.now() * 0.1) * 5;
-                offsetY = Math.sin(Date.now() * 0.15) * 5;
+            if (this.boss.hp < this.boss.maxHp * 0.3) {
+                offsetX = Math.sin(Date.now() * 0.05) * 3;
+                offsetY = Math.sin(Date.now() * 0.08) * 3;
             }
             
             this.ctx.fillText(ASSETS.BOSS, this.boss.x + offsetX, this.boss.y + offsetY);
@@ -1643,7 +2475,6 @@ class GameEngine {
             this.ctx.translate(o.x, o.y);
             this.ctx.rotate(o.angle);
             
-            // Glow for powerups
             if (o.type === 'POWERUP') {
                 const powerupData = ASSETS.POWERUPS[o.powerupType];
                 this.ctx.shadowBlur = 20;
@@ -1655,7 +2486,7 @@ class GameEngine {
             this.ctx.restore();
         });
         
-        // Boss Projectiles (player throws)
+        // Boss Projectiles
         this.ctx.shadowBlur = 0;
         this.bossProjectiles.forEach(p => {
             this.ctx.font = "30px Arial";
@@ -1673,15 +2504,21 @@ class GameEngine {
 
     gameOver() {
         this.running = false;
+        Weather.stop();
         
-        // Update stats
         Meta.data.stats.totalGifts += this.sessionStats.gifts;
         Meta.data.stats.totalBosses += this.sessionStats.bosses;
+        Meta.data.stats.gamesPlayed++;
+        if (this.gameTime > Meta.data.stats.maxTime) {
+            Meta.data.stats.maxTime = this.gameTime;
+        }
         if (this.maxCombo > Meta.data.stats.maxCombo) {
             Meta.data.stats.maxCombo = this.maxCombo;
         }
+        if (this.damageTaken === 0 && this.gameTime > 10) {
+            Meta.data.stats.noDamageGames++;
+        }
         
-        // Check completed quests
         let questRewards = 0;
         let completedQuestMessages = [];
         Meta.data.quests.forEach(quest => {
@@ -1695,9 +2532,19 @@ class GameEngine {
             }
         });
         
-        const earned = Math.floor(this.score / 2) + questRewards;
+        const newAchievements = Meta.checkAchievements();
+        let achievementRewards = 0;
+        let achievementMessages = [];
+        
+        newAchievements.forEach(ach => {
+            achievementRewards += ach.reward;
+            achievementMessages.push(`🏆 ${ach.name} (+${ach.reward} 🟡)`);
+        });
+        
+        const earned = Math.floor(this.score / 2) + questRewards + achievementRewards;
         Meta.addScore(this.score);
         Meta.data.wallet += earned;
+        Meta.updateLeaderboard(this.score);
         Meta.save();
         
         document.getElementById('go-score').innerText = this.score;
@@ -1710,6 +2557,14 @@ class GameEngine {
             questMsg.innerHTML = completedQuestMessages.join('<br>');
         } else {
             questMsg.style.display = 'none';
+        }
+        
+        const achMsg = document.getElementById('achievement-unlock-msg');
+        if (achievementMessages.length > 0) {
+            achMsg.style.display = 'block';
+            achMsg.innerHTML = achievementMessages.join('<br>');
+        } else {
+            achMsg.style.display = 'none';
         }
         
         UI.openModal('game-over-modal');
@@ -1787,7 +2642,7 @@ const UI = {
     
     switchTab(tab) {
         this.currentTab = tab;
-        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('#menu-screen .tab-btn').forEach(b => b.classList.remove('active'));
         event.target.classList.add('active');
         this.renderContent();
     },
@@ -1858,6 +2713,53 @@ const UI = {
                 `;
                 grid.appendChild(card);
             });
+        } else if (this.currentTab === 'pets') {
+            Object.keys(PETS).forEach(key => {
+                const pet = PETS[key];
+                const owned = Meta.data.pets[key];
+                const level = owned ? owned.level : 0;
+                const isMax = level >= pet.maxLevel;
+                const cost = owned ? Math.floor(pet.cost * Math.pow(1.5, level)) : pet.cost;
+                const canAfford = Meta.data.wallet >= cost;
+                
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.style.position = 'relative';
+                if (!owned) card.classList.add('locked');
+                card.innerHTML = `
+                    <h3>${pet.name} ${owned ? `<span class="lvl-badge">LVL ${level}/${pet.maxLevel}</span>` : ''}</h3>
+                    <div class="icon">${pet.icon}</div>
+                    <div style="font-size:0.8rem; color:#888">${pet.desc}</div>
+                    ${owned ? `<div style="font-size:0.7rem; color:#22c55e; margin-top:5px;">Интервал: ${(pet.baseInterval - level * 0.5).toFixed(1)}с</div>` : ''}
+                    <button class="btn" ${(isMax || !canAfford) ? 'disabled' : ''} 
+                        onclick="Meta.buyPet('${key}')">
+                        ${isMax ? 'MAX' : (owned ? 'УЛУЧШИТЬ ' : 'КУПИТЬ ') + cost + ' 🟡'}
+                    </button>
+                `;
+                grid.appendChild(card);
+            });
+        } else if (this.currentTab === 'achievements') {
+            ACHIEVEMENTS.forEach(ach => {
+                const unlocked = Meta.data.achievements.includes(ach.id);
+                
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.style.gridColumn = 'span 2';
+                card.innerHTML = `
+                    <div style="display: flex; align-items: center; gap: 15px; width: 100%;">
+                        <div class="icon" style="font-size: 3rem;">${ach.icon}</div>
+                        <div style="flex: 1; text-align: left;">
+                            <h3 style="margin: 0;">${ach.name} ${unlocked ? '✅' : '🔒'}</h3>
+                            <div style="font-size: 0.8rem; color: #888; margin-top: 5px;">${ach.desc}</div>
+                            <div style="font-size: 0.9rem; color: var(--gold); margin-top: 5px; font-weight: bold;">
+                                Награда: ${ach.reward} 🟡
+                            </div>
+                        </div>
+                    </div>
+                `;
+                if (!unlocked) card.style.opacity = '0.5';
+                grid.appendChild(card);
+            });
         }
         this.updateMenu();
     },
@@ -1880,7 +2782,7 @@ const UI = {
                     <div>
                         <div style="font-weight: bold;">${template.desc}</div>
                         <div style="font-size: 0.8rem; color: #888;">
-                            ${progress} / ${template.target}
+                            ${Math.floor(progress)} / ${template.target}
                         </div>
                     </div>
                     <div style="color: var(--gold); font-weight: bold;">
@@ -1893,6 +2795,37 @@ const UI = {
             `;
             list.appendChild(div);
         });
+    },
+    
+    renderLeaderboard() {
+        const list = document.getElementById('leaderboard-list');
+        list.innerHTML = '';
+        
+        const sorted = [...Meta.data.leaderboard].sort((a, b) => b.score - a.score).slice(0, 10);
+        
+        if (sorted.length === 0) {
+            list.innerHTML = '<div style="text-align: center; color: #888; padding: 20px;">Нет записей</div>';
+        } else {
+            sorted.forEach((entry, index) => {
+                const div = document.createElement('div');
+                div.className = 'leaderboard-item';
+                
+                let rankClass = '';
+                if (index === 0) rankClass = 'first';
+                else if (index === 1) rankClass = 'second';
+                else if (index === 2) rankClass = 'third';
+                
+                div.innerHTML = `
+                    <div class="leaderboard-rank ${rankClass}">${index + 1}</div>
+                    <div style="flex: 1;">${entry.name}</div>
+                    <div style="font-weight: bold; color: var(--gold);">${entry.score}</div>
+                `;
+                list.appendChild(div);
+            });
+        }
+        
+        const yourRank = sorted.findIndex(e => e.score === Meta.data.bestScore) + 1;
+        document.getElementById('your-rank').innerText = yourRank > 0 ? `#${yourRank}` : '-';
     },
     
     spawnFloatText(text, x, y, color) {
@@ -1921,6 +2854,8 @@ const UI = {
         this.closeAllModals();
         if (id === 'quest-modal') {
             this.renderQuests();
+        } else if (id === 'leaderboard-modal') {
+            this.renderLeaderboard();
         }
         document.getElementById(id).classList.add('open'); 
     },
@@ -1967,8 +2902,10 @@ const Game = {
    ============================================ */
 window.onload = () => { 
     Meta.init(); 
-    UI.init(); 
+    UI.init();
+    LoadingSystem.start();
 };
 </script>
 </body>
 </html>
+
